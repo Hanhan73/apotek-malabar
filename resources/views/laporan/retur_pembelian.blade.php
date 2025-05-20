@@ -81,7 +81,7 @@
                                     <td>{{ $retur->nomor_retur }}</td>
                                     <td>{{ \Carbon\Carbon::parse($retur->tanggal_retur)->format('d/m/Y') }}</td>
                                     <td>{{ $retur->pembelian ? $retur->pembelian->no_faktur : '-' }}</td>
-                                    <td>{{ $retur->supplier->nama }}</td>
+                                    <td>{{ $retur->pembelian->suppliers->nama_supplier }}</td>
                                     <td>{{ $retur->details->count() }}</td>
                                     <td>Rp {{ number_format($retur->total_nilai_retur, 0, ',', '.') }}</td>
                                     <td>

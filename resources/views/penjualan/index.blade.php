@@ -32,7 +32,6 @@
                                     <th>Tanggal</th>
                                     <th>Jenis Penjualan</th>
                                     <th>Total Harga</th>
-                                    <th>Status</th>
                                     <th>Petugas</th>
                                     <th>Aksi</th>
                                 </tr>
@@ -51,13 +50,6 @@
                                             @endif
                                         </td>
                                         <td>Rp {{ number_format($penjualan->total_harga, 0, ',', '.') }}</td>
-                                        <td>
-                                            @if ($penjualan->status_pembayaran == 'sudah_dibayar')
-                                                <span class="badge bg-success">Sudah Dibayar</span>
-                                            @else
-                                                <span class="badge bg-warning">Belum Dibayar</span>
-                                            @endif
-                                        </td>
                                         <td>{{ $penjualan->user->name }}</td>
                                         <td>
                                             <div class="btn-group" role="group">
@@ -65,19 +57,9 @@
                                                     <i class="bi bi-eye"></i> Detail
                                                 </a>
                                                 
-                                                @if ($penjualan->status_pembayaran == 'belum_dibayar')
                                                     <a href="{{ route('penjualan.edit', $penjualan->id) }}" class="btn btn-sm btn-warning">
                                                         <i class="bi bi-pencil"></i> Edit
                                                     </a>
-                                                    
-                                                    <form action="{{ route('penjualan.destroy', $penjualan->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus transaksi ini?')">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-sm btn-danger">
-                                                            <i class="bi bi-trash"></i> Hapus
-                                                        </button>
-                                                    </form>
-                                                @endif
                                             </div>
                                         </td>
                                     </tr>

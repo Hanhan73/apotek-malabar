@@ -21,13 +21,6 @@
 
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label for="nomor_nota">Nomor Nota:</label>
-                                    <input type="text" class="form-control @error('nomor_nota') is-invalid @enderror" id="nomor_nota" name="nomor_nota" value="{{ $nomorNota }}" readonly>
-                                    @error('nomor_nota')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
 
                                 <div class="form-group mb-3">
                                     <label for="tanggal">Tanggal:</label>

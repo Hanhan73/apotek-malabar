@@ -16,7 +16,8 @@ return new class extends Migration
             $table->string('kode_pembelian', 20)->unique();
             $table->foreignId('supplier_id')->constrained('suppliers');
             $table->date('tanggal_pembelian');
-            $table->enum('status', ['dipesan', 'dikirim', 'diterima', 'diretur'])->default('dipesan');
+            $table->enum('status', ['dipesan', 'dikirim', 'diterima', 'diterima_sebagian', 'diretur'])->default('dipesan');
+            $table->enum('status_pembayaran', ['belum_lunas', 'lunas'])->default('belum_lunas'); // Add this line
             $table->enum('jenis_pembayaran', ['tunai', 'kredit']);
             $table->decimal('total', 10, 2);
             $table->foreignId('user_id')->constrained('users');

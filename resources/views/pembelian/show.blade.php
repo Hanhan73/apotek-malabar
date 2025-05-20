@@ -121,17 +121,10 @@
                     <i class="bi bi-credit-card"></i> Pembayaran
                 </button>
             @endif
-            
-            @if($pembelian->status == 'diterima')
-                <button class="btn btn-warning btn-retur" data-id="{{ $pembelian->id }}">
-                    <i class="bi bi-arrow-left-right"></i> Retur Obat
-                </button>
-            @endif
+        
         </div>
         <div>
-            <a href="{{ route('pembelian.edit', $pembelian->id) }}" class="btn btn-warning">
-                <i class="bi bi-pencil"></i> Edit
-            </a>
+
             @if($pembelian->status == 'dipesan')
             <form action="{{ route('pembelian.destroy', $pembelian->id) }}" method="POST" class="d-inline">
                 @csrf

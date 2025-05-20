@@ -52,7 +52,7 @@ class PembelianController extends Controller
                 $sortDirection = $request->has('direction') ? $request->direction : 'desc';
                 $query->orderBy($request->sort, $sortDirection);
             } else {
-                $query->orderBy('tanggal_pembelian', 'desc');
+                $query->orderBy('tanggal', 'desc');
             }
             
             $pembelian = $query->paginate(10)->withQueryString();

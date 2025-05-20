@@ -24,7 +24,7 @@
                     @foreach($pembayarans as $key => $pembayaran)
                     <tr>
                         <td>{{ $key + 1 }}</td>
-                        <td>{{ $pembayaran->penerimaanPembelian->pembelian->no_pembelian ?? '-' }}</td>
+                        <td>{{ $pembayaran->penerimaanPembelian->pembelian->kode_pembelian ?? '-' }}</td>
                         <td>{{ $pembayaran->penerimaanPembelian->pembelian->supplier->nama_supplier ?? '-' }}</td>
                         <td>{{ \Carbon\Carbon::parse($pembayaran->tanggal_bayar)->format('d/m/Y') }}</td>
                         <td>Rp {{ number_format($pembayaran->jumlah_bayar, 0, ',', '.') }}</td>
@@ -35,8 +35,12 @@
                             </span>
                         </td>
                         <td>
-                            <a href="{{ route('pembayaran-pembelian.show', $pembayaran->id) }}" class="btn btn-sm btn-info">Detail</a>
-                            <a href="{{ route('pembayaran-pembelian.edit', $pembayaran->id) }}" class="btn btn-sm btn-primary">Edit</a>
+                            <a href="{{ route('pembayaran-pembelian.show', $pembayaran->id) }}" class="btn btn-sm btn-info">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                                <a href="{{ route('pembayaran-pembelian.edit', $pembayaran->id) }}" class="btn btn-sm btn-warning">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
                         </td>
                     </tr>
                     @endforeach

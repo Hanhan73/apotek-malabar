@@ -17,7 +17,7 @@ return new class extends Migration
             $table->date('tanggal');
             $table->decimal('total_harga', 12, 2);
             $table->enum('jenis_penjualan', ['dengan_resep', 'tanpa_resep']);
-            $table->enum('status_pembayaran', ['belum_dibayar', 'sudah_dibayar'])->default('belum_dibayar');
+            $table->enum('status_pembayaran', ['belum_dibayar', 'sudah_dibayar'])->default('sudah_dibayar');
             $table->foreignId('user_id')->constrained('users');
             $table->timestamps();
         });

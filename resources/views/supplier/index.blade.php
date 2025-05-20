@@ -54,9 +54,6 @@
                         <td>{{ Str::limit($item->alamat, 30) }}</td>
                         <td>{{ $item->telepon }}</td>
                         <td>
-                            <a href="{{ route('supplier.show', $item->id) }}" class="btn btn-sm btn-info">
-                                <i class="bi bi-eye"></i>
-                            </a>
                             <a href="{{ route('supplier.edit', $item->id) }}" class="btn btn-sm btn-warning">
                                 <i class="bi bi-pencil"></i>
                             </a>

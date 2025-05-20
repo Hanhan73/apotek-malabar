@@ -27,7 +27,7 @@
                             <div class="col-md-4">
                                 <button type="submit" class="btn btn-primary">Filter</button>
                                 <a href="{{ route('laporan.pembelian-tunai') }}" class="btn btn-outline-secondary">Reset</a>
-                                <button type="submit" name="export" value="pdf" class="btn btn-success" onclick="window.open(this.form.action + '?' + new URLSearchParams(new FormData(this.form)).toString() + '&export=pdf', '_blank'); return false;">
+                                <button type="submit" name="export" value="pdf" class="btn btn-success">
                                     <i class="bi bi-file-pdf"></i> Export PDF
                                 </button>
                                 <button type="button" class="btn btn-info" onclick="window.print()">
@@ -46,11 +46,12 @@
                             <thead>
                                 <tr>
                                     <th>No.</th>
-                                    <th>No. Faktur</th>
+                                    <th>Kode Pembelian</th>
                                     <th>Tanggal</th>
                                     <th>Supplier</th>
                                     <th>Jumlah Item</th>
                                     <th>Total Harga</th>
+                                    <th>Status</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
@@ -58,11 +59,22 @@
                                 @forelse ($pembelianTunai as $index => $pembelian)
                                 <tr>
                                     <td>{{ $index + 1 }}</td>
-                                    <td>{{ $pembelian->no_faktur }}</td>
+                                    <td>{{ $pembelian->kode_pembelian }}</td>
                                     <td>{{ \Carbon\Carbon::parse($pembelian->tanggal_pembelian)->format('d/m/Y') }}</td>
-                                    <td>{{ $pembelian->supplier->nama }}</td>
-                                    <td>{{ $pembelian->details->count() }}</td>
-                                    <td>Rp {{ number_format($pembelian->total_harga, 0, ',', '.') }}</td>
+                                    <td>{{ $pembelian->supplier->nama_supplier }}</td>
+                                    <td>{{ $pembelian->detailPembelian->count() }}</td>
+                                    <td>Rp {{ number_format($pembelian->total, 0, ',', '.') }}</td>
+                                    <td>
+                                        @if($pembelian->status == 'dipesan')
+                                            <span class="badge bg-secondary">Dipesan</span>
+                                        @elseif($pembelian->status == 'dikirim')
+                                            <span class="badge bg-info">Dikirim</span>
+                                        @elseif($pembelian->status == 'diterima')
+                                            <span class="badge bg-success">Diterima</span>
+                                        @elseif($pembelian->status == 'diretur')
+                                            <span class="badge bg-warning">Diretur</span>
+                                        @endif
+                                    </td>
                                     <td>
                                         <a href="#" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#detailModal{{ $pembelian->id }}">
                                             <i class="bi bi-eye"></i> Detail
@@ -71,14 +83,14 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="7" class="text-center">Tidak ada data pembelian tunai pada periode ini</td>
+                                    <td colspan="8" class="text-center">Tidak ada data pembelian tunai pada periode ini</td>
                                 </tr>
                                 @endforelse
                             </tbody>
                             <tfoot>
                                 <tr>
                                     <td colspan="5" class="text-end fw-bold">Total Pembelian Tunai:</td>
-                                    <td colspan="2" class="fw-bold">Rp {{ number_format($totalPembelian, 0, ',', '.') }}</td>
+                                    <td colspan="3" class="fw-bold">Rp {{ number_format($totalPembelian, 0, ',', '.') }}</td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -95,18 +107,30 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="detailModalLabel{{ $pembelian->id }}">Detail Pembelian #{{ $pembelian->no_faktur }}</h5>
+                <h5 class="modal-title" id="detailModalLabel{{ $pembelian->id }}">Detail Pembelian #{{ $pembelian->kode_pembelian }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <p><strong>Supplier:</strong> {{ $pembelian->supplier->nama }}</p>
+                        <p><strong>Supplier:</strong> {{ $pembelian->supplier->nama_supplier }}</p>
                         <p><strong>Tanggal:</strong> {{ \Carbon\Carbon::parse($pembelian->tanggal_pembelian)->format('d/m/Y') }}</p>
+                        <p><strong>Status:</strong> 
+                            @if($pembelian->status == 'dipesan')
+                                <span class="badge bg-secondary">Dipesan</span>
+                            @elseif($pembelian->status == 'dikirim')
+                                <span class="badge bg-info">Dikirim</span>
+                            @elseif($pembelian->status == 'diterima')
+                                <span class="badge bg-success">Diterima</span>
+                            @elseif($pembelian->status == 'diretur')
+                                <span class="badge bg-warning">Diretur</span>
+                            @endif
+                        </p>
                     </div>
                     <div class="col-md-6">
-                        <p><strong>No. Faktur:</strong> {{ $pembelian->no_faktur }}</p>
-                        <p><strong>Total Harga:</strong> Rp {{ number_format($pembelian->total_harga, 0, ',', '.') }}</p>
+                        <p><strong>Kode Pembelian:</strong> {{ $pembelian->kode_pembelian }}</p>
+                        <p><strong>Total Harga:</strong> Rp {{ number_format($pembelian->total, 0, ',', '.') }}</p>
+                        <p><strong>Dibuat Oleh:</strong> {{ $pembelian->users->name }}</p>
                     </div>
                 </div>
 
@@ -124,7 +148,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($pembelian->details as $index => $detail)
+                            @foreach ($pembelian->detailPembelian as $index => $detail)
                             <tr>
                                 <td>{{ $index + 1 }}</td>
                                 <td>{{ $detail->obat->kode_obat }}</td>
@@ -138,7 +162,7 @@
                         <tfoot>
                             <tr>
                                 <td colspan="5" class="text-end fw-bold">Total:</td>
-                                <td class="fw-bold">Rp {{ number_format($pembelian->total_harga, 0, ',', '.') }}</td>
+                                <td class="fw-bold">Rp {{ number_format($pembelian->total, 0, ',', '.') }}</td>
                             </tr>
                         </tfoot>
                     </table>

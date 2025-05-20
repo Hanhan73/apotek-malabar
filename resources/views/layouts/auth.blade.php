@@ -2,39 +2,38 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Login - Ganesha Sora</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apotek Malabar - Login</title>
+    
+    <!-- CSS Libraries -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
+    
     <style>
         body {
-            background: #f8f9fa;
-            --primary-color: #3e2f1c;     
-            --secondary-color: #fdf6e3;   
-            --accent-color:rgb(216, 216, 216);      
-            --text-color: #ffffff;        
-            --bg-color: #fffaf0;    
-        }
-
-        .auth-box {
-            max-width: 450px;
-            margin: 80px auto;
-            padding: 30px;
-            background: var(--primary-color);
-            border-radius: 8px;
-            box-shadow: 0 0 10px var(--primary-color);
-        }
-
-        .auth-box h2 {
-            margin-bottom: 20px;
-            font-weight: 600;
-            text-align: center;
+            background: linear-gradient(120deg, #4e73df 0%, #224abe 100%);
+            font-family: 'Nunito', sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 0;
         }
     </style>
+    
+    @stack('styles')
 </head>
-<body>
-    <div class="auth-box">
-        @yield('content')
-    </div>
+<body class="auth-page">
+    @yield('content')
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    @stack('scripts')
 </body>
 </html>

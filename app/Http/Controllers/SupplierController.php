@@ -56,38 +56,45 @@ class SupplierController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        try {
-            $validated = $request->validate([
-                'nama_supplier' => 'required|string|max:255',
-                'alamat' => 'required|string|max:500',
-                'telepon' => 'required|string|max:15|regex:/^[0-9\-\+]+$/'
-            ], [
-                'telepon.regex' => 'Format nomor telepon tidak valid'
-            ]);
-            
-            $lastSupplier = Supplier::orderBy('id', 'desc')->first();
-            $lastNumber = $lastSupplier ? intval(substr($lastSupplier->kode_supplier, 3)) : 0;
-            $newNumber = $lastNumber + 1;
-            $kodeSupplier = str_pad($newNumber, 2, '0', STR_PAD_LEFT);
-            
-            $supplier = new Supplier([
-                'kode_supplier' => $kodeSupplier,
-                'nama_supplier' => $request->nama_supplier,
-                'alamat' => $request->alamat,
-                'telepon' => $request->telepon
-            ]);
-            
-            $supplier->save();
-            
-            return redirect()->route('supplier.index')->with('success', 'Supplier berhasil ditambahkan.');
-        } catch (Exception $e) {
-            Log::error('Error creating supplier: ' . $e->getMessage());
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Gagal menambahkan supplier: ' . $e->getMessage());
+{
+    try {
+        $validated = $request->validate([
+            'nama_supplier' => 'required|string|max:255',
+            'alamat' => 'required|string|max:500',
+            'telepon' => 'required|string|max:15|regex:/^[0-9\-\+]+$/'
+        ], [
+            'telepon.regex' => 'Format nomor telepon tidak valid'
+        ]);
+        
+        // Generate a unique kode_supplier
+        $lastSupplier = Supplier::orderBy('kode_supplier', 'desc')->first();
+        $lastNumber = $lastSupplier ? intval($lastSupplier->kode_supplier) : 0;
+        $newNumber = $lastNumber + 1;
+        $kodeSupplier = str_pad($newNumber, 3, '0', STR_PAD_LEFT);
+        
+        // Ensure the code is unique
+        while (Supplier::where('kode_supplier', $kodeSupplier)->exists()) {
+            $newNumber++;
+            $kodeSupplier = str_pad($newNumber, 3, '0', STR_PAD_LEFT);
         }
+        
+        $supplier = new Supplier([
+            'kode_supplier' => $kodeSupplier,
+            'nama_supplier' => $request->nama_supplier,
+            'alamat' => $request->alamat,
+            'telepon' => $request->telepon
+        ]);
+        
+        $supplier->save();
+        
+        return redirect()->route('supplier.index')->with('success', 'Supplier berhasil ditambahkan.');
+    } catch (Exception $e) {
+        Log::error('Error creating supplier: ' . $e->getMessage());
+        return redirect()->back()
+            ->withInput()
+            ->with('error', 'Gagal menambahkan supplier: ' . $e->getMessage());
     }
+}
 
     /**
      * Display the specified resource.

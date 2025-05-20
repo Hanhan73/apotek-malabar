@@ -51,18 +51,9 @@
                             <a href="{{ route('pembelian.show', $item->id) }}" class="btn btn-sm btn-info">
                                 <i class="bi bi-eye"></i>
                             </a>
-                            @if($item->status == 'dipesan')
                                 <a href="{{ route('pembelian.edit', $item->id) }}" class="btn btn-sm btn-warning">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                <form action="{{ route('pembelian.destroy', $item->id) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Hapus data?')">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
-                            @endif
                         </td>
                     </tr>
                     @endforeach

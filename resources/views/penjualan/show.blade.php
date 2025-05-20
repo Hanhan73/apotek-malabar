@@ -66,17 +66,6 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td>Status Pembayaran</td>
-                                        <td>:</td>
-                                        <td>
-                                            @if ($penjualan->status_pembayaran == 'sudah_dibayar')
-                                                <span class="badge bg-success">Sudah Dibayar</span>
-                                            @else
-                                                <span class="badge bg-warning">Belum Dibayar</span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                    <tr>
                                         <td>Petugas</td>
                                         <td>:</td>
                                         <td>{{ $penjualan->user->name }}</td>
@@ -120,53 +109,7 @@
                         </table>
                     </div>
 
-                    @if($penjualan->status_pembayaran == 'belum_dibayar')
-                        <div class="mt-4">
-                            <a href="{{ route('pembayaran-pembelian.create', ['penjualan_id' => $penjualan->id]) }}" class="btn btn-success">
-                                <i class="bi bi-cash"></i> Proses Pembayaran
-                            </a>
-                        </div>
-                    @endif
 
-                    @if($penjualan->status_pembayaran == 'sudah_dibayar' && $penjualan->pembayaran)
-                        <h6 class="fw-bold mt-4">Informasi Pembayaran</h6>
-                        <div class="table-responsive">
-                            <table class="table table-bordered">
-                                <tr>
-                                    <th width="25%">Tanggal Pembayaran</th>
-                                    <td>{{ \Carbon\Carbon::parse($penjualan->pembayaran->created_at)->format('d/m/Y H:i:s') }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Jumlah Dibayar</th>
-                                    <td>Rp {{ number_format($penjualan->pembayaran->jumlah_bayar, 0, ',', '.') }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Kembalian</th>
-                                    <td>Rp {{ number_format($penjualan->pembayaran->kembalian, 0, ',', '.') }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Metode Pembayaran</th>
-                                    <td>{{ ucfirst($penjualan->pembayaran->metode_pembayaran) }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Keterangan</th>
-                                    <td>{{ $penjualan->pembayaran->keterangan ?: '-' }}</td>
-                                </tr>
-                            </table>
-                        </div>
-                    @endif
-
-                    <div class="row mt-4">
-                        <div class="col-md-12 d-flex justify-content-between">
-                            <a href="{{ route('penjualan.index') }}" class="btn btn-secondary">
-                                <i class="bi bi-arrow-left"></i> Kembali ke Daftar
-                            </a>
-                            
-                            <a href="#" class="btn btn-primary" onclick="window.print()">
-                                <i class="bi bi-printer"></i> Cetak
-                            </a>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

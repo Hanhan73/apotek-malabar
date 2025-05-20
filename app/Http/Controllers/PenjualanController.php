@@ -37,7 +37,6 @@ class PenjualanController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nomor_nota' => 'required|unique:penjualans',
             'tanggal' => 'required|date',
             'jenis_penjualan' => 'required|in:dengan_resep,tanpa_resep',
             'obat_id' => 'required|array',
@@ -46,11 +45,24 @@ class PenjualanController extends Controller
             'jumlah.*' => 'integer|min:1',
         ]);
 
+        $now = now(); // atau bisa pakai Carbon::now() jika Carbon dipakai
+        $currentYear = $now->format('Y');    // contoh: '2025'
+        $currentMonth = $now->format('m');   // contoh: '05'
+        // Generate a unique kode_supplier
+        $lastPenjualan = Penjualan::orderBy('nomor_nota', 'desc')->first();
+        $lastNumber = $lastPenjualan ? intval($lastPenjualan->kode_supplier) : 0;
+        $newNumber = $lastNumber + 1;
+        $kodePenjualan = str_pad($newNumber, 3, '0', STR_PAD_LEFT);
+        
+        $sequenceNumber = $lastPenjualan ? 
+                         (int) substr($lastPenjualan->no_nota, -3) + 1 : 1;
+        $kodePenjualan = $currentYear . $currentMonth . str_pad($sequenceNumber, 3, '0', STR_PAD_LEFT);
+
         DB::beginTransaction();
         try {
             // Buat transaksi penjualan
             $penjualan = Penjualan::create([
-                'nomor_nota' => $request->nomor_nota,
+                'nomor_nota' => $kodePenjualan,
                 'tanggal' => $request->tanggal,
                 'jenis_penjualan' => $request->jenis_penjualan,
                 'user_id' => Auth::id(),
@@ -79,6 +91,7 @@ class PenjualanController extends Controller
                     'penjualan_id' => $penjualan->id,
                     'obat_id' => $obatId,
                     'jumlah' => $jumlah,
+                    'status' => 'lunas',
                     'harga_satuan' => $hargaSatuan,
                     'subtotal' => $subtotal,
                 ]);

@@ -11,9 +11,9 @@
         <div class="card-body">
             <div class="row">
                 <div class="col-md-6">
-                    <p><strong>No. Pembelian:</strong> {{ $pembayaran->penerimaanPembelian->pembelian->no_pembelian ?? '-' }}</p>
+                    <p><strong>No. Pembelian:</strong> {{ $pembayaran->penerimaanPembelian->pembelian->kode_pembelian ?? '-' }}</p>
                     <p><strong>Supplier:</strong> {{ $pembayaran->penerimaanPembelian->pembelian->supplier->nama_supplier }}</p>
-                    <p><strong>Total Harga:</strong> Rp {{ number_format($pembayaran->penerimaanPembelian->pembelian->total_harga, 0, ',', '.') }}</p>
+                    <p><strong>Total Harga:</strong> Rp {{ number_format($pembayaran->penerimaanPembelian->pembelian->total, 0, ',', '.') }}</p>
                 </div>
                 <div class="col-md-6">
                     <p><strong>Tanggal Bayar:</strong> {{ \Carbon\Carbon::parse($pembayaran->tanggal_bayar)->format('d/m/Y') }}</p>
@@ -21,9 +21,10 @@
                     <p><strong>Metode Pembayaran:</strong> {{ ucfirst($pembayaran->metode_pembayaran) }}</p>
                     <p>
                         <strong>Status:</strong> 
-                        <span class="badge badge-{{ $pembayaran->status == 'lunas' ? 'success' : 'warning' }}">
+                        
+                        <strong class="badge badge-{{ $pembayaran->status == 'lunas' ? 'success' : 'warning' }}">
                             {{ ucfirst($pembayaran->status) }}
-                        </span>
+                        </strong>
                     </p>
                 </div>
             </div>
@@ -59,7 +60,7 @@
                 <tfoot>
                     <tr>
                         <th colspan="4" class="text-right">Total</th>
-                        <th>Rp {{ number_format($pembayaran->penerimaanPembelian->pembelian->total_harga, 0, ',', '.') }}</th>
+                        <th>Rp {{ number_format($pembayaran->penerimaanPembelian->pembelian->total, 0, ',', '.') }}</th>
                     </tr>
                 </tfoot>
             </table>
