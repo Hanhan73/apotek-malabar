@@ -12,6 +12,8 @@ use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Response;
 
 class LaporanController extends Controller
 {
@@ -26,40 +28,44 @@ class LaporanController extends Controller
     /**
      * Laporan Pembelian Tunai
      */
-     public function pembelianTunai(Request $request)
+      public function pembelianTunai(Request $request)
     {
         $request->validate([
-            'tanggal_mulai' => 'nullable|date',
-            'tanggal_akhir' => 'nullable|date|after_or_equal:tanggal_mulai',
+            'bulan' => 'nullable|date_format:Y-m', // Format: YYYY-MM
         ]);
 
-        // Set default date range if not provided
-        $tanggalMulai = $request->tanggal_mulai 
-            ? Carbon::parse($request->tanggal_mulai)->startOfDay() 
-            : Carbon::now()->startOfMonth();
-            
-        $tanggalAkhir = $request->tanggal_akhir 
-            ? Carbon::parse($request->tanggal_akhir)->endOfDay() 
-            : Carbon::now()->endOfDay();
+        // Default bulan berjalan jika tidak diisi
+        $bulan = $request->bulan ?? Carbon::now()->format('Y-m');
+        
+        // Parse bulan dan tentukan tanggal awal-akhir bulan
+        $tanggalMulai = Carbon::parse($bulan)->startOfMonth();
+        $tanggalAkhir = Carbon::parse($bulan)->endOfMonth();
 
-        // Get pembelian data
         $pembelianTunai = Pembelian::with(['supplier', 'detailPembelian.obat', 'users'])
             ->where('jenis_pembayaran', 'tunai')
             ->whereBetween('tanggal_pembelian', [$tanggalMulai, $tanggalAkhir])
-            ->orderBy('tanggal_pembelian', 'desc')
+            ->orderBy('tanggal_pembelian')
             ->get();
 
-        // Calculate total pembelian
         $totalPembelian = $pembelianTunai->sum('total');
         
-        // If request is for PDF export
         if ($request->has('export') && $request->export == 'pdf') {
-            // Generate PDF (you need to implement this part if needed)
-            // Here I'm assuming a simple redirect back for now
-            return redirect()->back()->with('info', 'Export PDF functionality will be implemented later');
+            return Pdf::loadView('laporan.pembelian_tunai_pdf', [
+                'pembelianTunai' => $pembelianTunai,
+                'totalPembelian' => $totalPembelian,
+                'bulan' => $bulan, // Kirim bulan ke view
+                'tanggalMulai' => $tanggalMulai,
+                'tanggalAkhir' => $tanggalAkhir
+            ])->download('laporan_pembelian_tunai_'.$bulan.'.pdf');
         }
 
-        return view('laporan.pembelian_tunai', compact('pembelianTunai', 'totalPembelian', 'tanggalMulai', 'tanggalAkhir'));
+        return view('laporan.pembelian_tunai', compact(
+            'pembelianTunai', 
+            'totalPembelian',
+            'bulan',
+            'tanggalMulai',
+            'tanggalAkhir'
+        ));
     }
 
     /**
@@ -482,24 +488,53 @@ class LaporanController extends Controller
     ));
 }
 
-        private function exportToCSV($data, $headings, $filename)
-    {
-        $callback = function() use ($data, $headings) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, $headings);
-            
-            foreach ($data as $row) {
-                fputcsv($file, $row);
-            }
-            
-            fclose($file);
-        };
-        
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ];
-        
-        return Response::stream($callback, 200, $headers);
-    }
+
+
+/**
+ * Generate PDF file for report
+ *
+ * @param string $view View name
+ * @param array $data Data untuk view
+ * @param string $filename Nama file PDF
+ * @return \Illuminate\Http\Response
+ */
+private function generatePdf($view, $data, $filename)
+{
+    $pdf = PDF::loadView($view, $data);
+    $pdf->setPaper('a4', 'portrait');
+    
+    return $pdf->download($filename.'.pdf');
 }
+
+/**
+ * Export to CSV
+ *
+ * @param array $data Array of data rows
+ * @param array $headings Column headings
+ * @param string $filename Filename
+ * @return \Illuminate\Http\Response
+ */
+private function exportToCSV($data, $headings, $filename)
+{
+    $callback = function() use ($data, $headings) {
+        $file = fopen('php://output', 'w');
+        fputcsv($file, $headings);
+        
+        foreach ($data as $row) {
+            fputcsv($file, $row);
+        }
+        
+        fclose($file);
+    };
+    
+    $headers = [
+        'Content-Type' => 'text/csv',
+        'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+    ];
+    
+    return Response::stream($callback, 200, $headers);
+}
+
+}
+
+

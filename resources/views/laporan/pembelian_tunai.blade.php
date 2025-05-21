@@ -14,32 +14,28 @@
 
                 <div class="card-body">
                     <!-- Filter Form -->
-                    <form method="GET" action="{{ route('laporan.pembelian-tunai') }}" class="mb-4">
-                        <div class="row g-3 align-items-end">
-                            <div class="col-md-4">
-                                <label for="tanggal_mulai" class="form-label">Tanggal Mulai</label>
-                                <input type="date" class="form-control" id="tanggal_mulai" name="tanggal_mulai" value="{{ request('tanggal_mulai', $tanggalMulai->format('Y-m-d')) }}">
-                            </div>
-                            <div class="col-md-4">
-                                <label for="tanggal_akhir" class="form-label">Tanggal Akhir</label>
-                                <input type="date" class="form-control" id="tanggal_akhir" name="tanggal_akhir" value="{{ request('tanggal_akhir', $tanggalAkhir->format('Y-m-d')) }}">
-                            </div>
-                            <div class="col-md-4">
-                                <button type="submit" class="btn btn-primary">Filter</button>
-                                <a href="{{ route('laporan.pembelian-tunai') }}" class="btn btn-outline-secondary">Reset</a>
-                                <button type="submit" name="export" value="pdf" class="btn btn-success">
-                                    <i class="bi bi-file-pdf"></i> Export PDF
-                                </button>
-                                <button type="button" class="btn btn-info" onclick="window.print()">
-                                    <i class="bi bi-printer"></i> Print
-                                </button>
+<!-- resources/views/laporan/pembelian_tunai.blade.php -->
+                            <form method="GET" action="{{ route('laporan.pembelian-tunai') }}" class="mb-4">
+                                <div class="row g-3 align-items-end">
+                                    <div class="col-md-4">
+                                        <label for="bulan" class="form-label">Pilih Bulan</label>
+                                        <input type="month" class="form-control" id="bulan" name="bulan" 
+                                            value="{{ request('bulan', date('Y-m')) }}">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button type="submit" class="btn btn-primary">Filter</button>
+                                        <button type="submit" name="export" value="pdf" class="btn btn-success">
+                                            <i class="bi bi-file-pdf"></i> Export PDF
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+
+                            <div class="alert alert-info">
+                                <strong>Periode:</strong> Bulan {{ \Carbon\Carbon::parse($bulan)->translatedFormat('F Y') }}
                             </div>
                         </div>
                     </form>
-
-                    <div class="alert alert-info">
-                        <strong>Periode:</strong> {{ $tanggalMulai->format('d/m/Y') }} - {{ $tanggalAkhir->format('d/m/Y') }}
-                    </div>
 
                     <div class="table-responsive">
                         <table class="table table-bordered table-striped">
