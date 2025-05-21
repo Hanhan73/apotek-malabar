@@ -61,9 +61,6 @@
                             <button type="submit" name="export" value="pdf" class="btn btn-success" onclick="window.open(this.form.action + '?' + new URLSearchParams(new FormData(this.form)).toString() + '&export=pdf', '_blank'); return false;">
                                 <i class="bi bi-file-pdf"></i> Export PDF
                             </button>
-                            <button type="button" class="btn btn-info" onclick="window.print()">
-                                <i class="bi bi-printer"></i> Print
-                            </button>
                         </div>
                     </form>
 
@@ -93,59 +90,6 @@
                         ({{ $sortOrder == 'asc' ? 'A-Z' : 'Z-A' }})
                     </div>
 
-                    <div class="row mb-4">
-                        <div class="col-md-3">
-                            <div class="card bg-primary text-white">
-                                <div class="card-body">
-                                    <h6 class="card-title">Total Obat</h6>
-                                    <h4 class="mt-2">{{ $totalObat }} Jenis</h4>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-success text-white">
-                                <div class="card-body">
-                                    <h6 class="card-title">Obat Tersedia</h6>
-                                    <h4 class="mt-2">{{ $obatTersedia }} Jenis</h4>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-warning text-white">
-                                <div class="card-body">
-                                    <h6 class="card-title">Hampir Habis</h6>
-                                    <h4 class="mt-2">{{ $obatHampirHabis }} Jenis</h4>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-danger text-white">
-                                <div class="card-body">
-                                    <h6 class="card-title">Obat Kosong</h6>
-                                    <h4 class="mt-2">{{ $obatKosong }} Jenis</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h6 class="card-title">Total Stok Obat</h6>
-                                    <h4 class="mt-2">{{ number_format($totalStok, 0, ',', '.') }} Unit</h4>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h6 class="card-title">Total Nilai Persediaan</h6>
-                                    <h4 class="mt-2">Rp {{ number_format($totalNilai, 0, ',', '.') }}</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
                     <div class="table-responsive">
                         <table class="table table-bordered table-striped">
@@ -156,7 +100,6 @@
                                     <th>Nama Obat</th>
                                     <th>Jenis</th>
                                     <th>Stok</th>
-                                    <th>Satuan</th>
                                     <th>Harga Beli</th>
                                     <th>Harga Jual</th>
                                     <th>Kadaluarsa</th>
@@ -171,7 +114,6 @@
                                     <td>{{ $obat->nama_obat }}</td>
                                     <td>{{ $obat->jenis_obat }}</td>
                                     <td>{{ $obat->stok }}</td>
-                                    <td>{{ $obat->satuan ?? '-' }}</td>
                                     <td>Rp {{ number_format($obat->harga_beli, 0, ',', '.') }}</td>
                                     <td>Rp {{ number_format($obat->harga_jual, 0, ',', '.') }}</td>
                                     <td>

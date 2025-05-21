@@ -20,6 +20,8 @@ return new class extends Migration
             $table->enum('status_pembayaran', ['belum_lunas', 'lunas'])->default('belum_lunas'); // Add this line
             $table->enum('jenis_pembayaran', ['tunai', 'kredit']);
             $table->decimal('total', 10, 2);
+            $table->date('tanggal_jatuh_tempo');
+            $table->decimal('sisa_pembayaran', 12, 2);
             $table->foreignId('user_id')->constrained('users');
             $table->timestamps();
         });

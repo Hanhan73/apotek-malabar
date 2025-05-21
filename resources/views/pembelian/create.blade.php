@@ -169,6 +169,14 @@
                 </div>
             </div>
 
+            <div id="kredit-options" class="row mb-3" style="display: none;">
+                <div class="col-md-6">
+                    <label for="tanggal_jatuh_tempo" class="form-label">Tanggal Jatuh Tempo*</label>
+                    <input type="date" class="form-control" id="tanggal_jatuh_tempo" name="tanggal_jatuh_tempo" 
+                        value="{{ old('tanggal_jatuh_tempo') }}" required>
+                </div>
+            </div>
+
             <div class="d-flex justify-content-end">
                 <button type="submit" class="btn btn-primary">
                     <i class="bi bi-save"></i> Simpan Pembelian
@@ -381,5 +389,27 @@
         // Initial dropdown options update
         updateDropdownOptions();
     });
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+    const jenisPembayaranSelect = document.getElementById('jenis_pembayaran');
+    const kreditOptions = document.getElementById('kredit-options');
+    
+    jenisPembayaranSelect.addEventListener('change', function() {
+        if (this.value === 'kredit') {
+            kreditOptions.style.display = 'flex';
+            document.getElementById('tanggal_jatuh_tempo').setAttribute('required', 'required');
+        } else {
+            kreditOptions.style.display = 'none';
+            document.getElementById('tanggal_jatuh_tempo').removeAttribute('required');
+        }
+    });
+    
+    // Trigger event pada load untuk menangani nilai awal
+    if (jenisPembayaranSelect.value === 'kredit') {
+        kreditOptions.style.display = 'flex';
+        document.getElementById('tanggal_jatuh_tempo').setAttribute('required', 'required');
+    }
+});
 </script>
 @endsection

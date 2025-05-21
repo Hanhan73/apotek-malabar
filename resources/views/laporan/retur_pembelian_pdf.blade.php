@@ -1,197 +1,169 @@
-@extends('layouts.app')
-
-@section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Laporan Retur Pembelian</h5>
-                    <div>
-                        <a href="{{ route('laporan.index') }}" class="btn btn-secondary">Kembali</a>
-                    </div>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Laporan Retur Pembelian</title>
+    <style>
+        body { 
+            font-family: DejaVu Sans, sans-serif; 
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .container {
+            width: 100%;
+            padding: 10px;
+        }
+        .text-center { 
+            text-align: center; 
+        }
+        .text-right { 
+            text-align: right; 
+        }
+        .mb-4 {
+            margin-bottom: 1rem;
+        }
+        .mt-5 {
+            margin-top: 3rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 5px;
+        }
+        th {
+            background-color: #f2f2f2;
+            text-align: center;
+        }
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .col-md-4 {
+            width: 33.33%;
+        }
+        .col-md-8 {
+            width: 66.66%;
+        }
+        .fw-bold {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h3 class="text-center mb-4">Laporan Retur Pembelian</h3>
+        <p class="text-center mb-4">Periode: {{ $tanggalMulai->format('d/m/Y') }} - {{ $tanggalAkhir->format('d/m/Y') }}</p>
+        
+        @if($supplierId)
+        <div class="text-center mb-4">
+            <strong>Supplier:</strong> {{ $suppliers->firstWhere('id', $supplierId)->nama_supplier }}
+        </div>
+        @endif
+        
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div>
+                    <strong>Total Nilai Retur:</strong> Rp {{ number_format($totalNilaiRetur, 0, ',', '.') }}
                 </div>
-
-                <div class="card-body">
-                    <!-- Filter Form -->
-                    <form method="GET" action="{{ route('laporan.retur-pembelian') }}" class="mb-4">
-                        <div class="row g-3 align-items-end">
-                            <div class="col-md-3">
-                                <label for="tanggal_mulai" class="form-label">Tanggal Mulai</label>
-                                <input type="date" class="form-control" id="tanggal_mulai" name="tanggal_mulai" value="{{ request('tanggal_mulai', $tanggalMulai->format('Y-m-d')) }}">
-                            </div>
-                            <div class="col-md-3">
-                                <label for="tanggal_akhir" class="form-label">Tanggal Akhir</label>
-                                <input type="date" class="form-control" id="tanggal_akhir" name="tanggal_akhir" value="{{ request('tanggal_akhir', $tanggalAkhir->format('Y-m-d')) }}">
-                            </div>
-                            <div class="col-md-2">
-                                <label for="supplier_id" class="form-label">Supplier</label>
-                                <select class="form-control" id="supplier_id" name="supplier_id">
-                                    <option value="">Semua Supplier</option>
-                                    @foreach($suppliers as $supplier)
-                                        <option value="{{ $supplier->id }}" {{ $supplierId == $supplier->id ? 'selected' : '' }}>
-                                            {{ $supplier->nama }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <button type="submit" class="btn btn-primary">Filter</button>
-                                <a href="{{ route('laporan.retur-pembelian') }}" class="btn btn-outline-secondary">Reset</a>
-                                <button type="submit" name="export" value="pdf" class="btn btn-success" onclick="window.open(this.form.action + '?' + new URLSearchParams(new FormData(this.form)).toString() + '&export=pdf', '_blank'); return false;">
-                                    <i class="bi bi-file-pdf"></i> Export PDF
-                                </button>
-                                <button type="button" class="btn btn-info" onclick="window.print()">
-                                    <i class="bi bi-printer"></i> Print
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-
-                    <div class="alert alert-info">
-                        <strong>Periode:</strong> {{ $tanggalMulai->format('d/m/Y') }} - {{ $tanggalAkhir->format('d/m/Y') }} | 
-                        <strong>Supplier:</strong> {{ $supplierId ? $suppliers->firstWhere('id', $supplierId)->nama : 'Semua Supplier' }}
-                    </div>
-
-                    <div class="card mb-4 bg-light">
-                        <div class="card-body">
-                            <h6 class="card-title">Total Nilai Retur:</h6>
-                            <h4 class="mt-2">Rp {{ number_format($totalNilaiRetur, 0, ',', '.') }}</h4>
-                        </div>
-                    </div>
-
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                    <th>No.</th>
-                                    <th>No. Retur</th>
-                                    <th>Tanggal</th>
-                                    <th>No. Faktur</th>
-                                    <th>Supplier</th>
-                                    <th>Jumlah Item</th>
-                                    <th>Total Nilai</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse ($returPembelian as $index => $retur)
-                                <tr>
-                                    <td>{{ $index + 1 }}</td>
-                                    <td>{{ $retur->nomor_retur }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($retur->tanggal_retur)->format('d/m/Y') }}</td>
-                                    <td>{{ $retur->pembelian ? $retur->pembelian->no_faktur : '-' }}</td>
-                                    <td>{{ $retur->pembelian->suppliers->nama_supplier }}</td>
-                                    <td>{{ $retur->details->count() }}</td>
-                                    <td>Rp {{ number_format($retur->total_nilai_retur, 0, ',', '.') }}</td>
-                                    <td>
-                                        <a href="#" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#detailModal{{ $retur->id }}">
-                                            <i class="bi bi-eye"></i> Detail
-                                        </a>
-                                    </td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="8" class="text-center">Tidak ada data retur pembelian pada periode ini</td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
+            </div>
+            <div class="col-md-4">
+                <div>
+                    <strong>Total Transaksi Retur:</strong> {{ $returPembelian->count() }}
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div>
+                    <strong>Total Item Diretur:</strong> {{ $returPembelian->sum(function($retur) { return $retur->items->count(); }) }}
                 </div>
             </div>
         </div>
-    </div>
-</div>
-
-<!-- Modal Detail untuk setiap retur -->
-@foreach ($returPembelian as $retur)
-<div class="modal fade" id="detailModal{{ $retur->id }}" tabindex="-1" aria-labelledby="detailModalLabel{{ $retur->id }}" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="detailModalLabel{{ $retur->id }}">Detail Retur Pembelian #{{ $retur->nomor_retur }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <p><strong>Supplier:</strong> {{ $retur->supplier->nama }}</p>
-                        <p><strong>Tanggal Retur:</strong> {{ \Carbon\Carbon::parse($retur->tanggal_retur)->format('d/m/Y') }}</p>
-                        <p><strong>No. Faktur Pembelian:</strong> {{ $retur->pembelian ? $retur->pembelian->no_faktur : '-' }}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <p><strong>No. Retur:</strong> {{ $retur->nomor_retur }}</p>
-                        <p><strong>Total Nilai Retur:</strong> Rp {{ number_format($retur->total_nilai_retur, 0, ',', '.') }}</p>
-                        <p><strong>Alasan Retur:</strong> {{ $retur->alasan_retur ?: '-' }}</p>
-                    </div>
-                </div>
-
-                <h6 class="fw-bold mb-3">Daftar Obat Diretur</h6>
-                <div class="table-responsive">
-                    <table class="table table-bordered table-striped">
-                        <thead>
-                            <tr>
-                                <th>No.</th>
-                                <th>Kode Obat</th>
-                                <th>Nama Obat</th>
-                                <th>Jumlah</th>
-                                <th>Harga Satuan</th>
-                                <th>Subtotal</th>
-                                <th>Keterangan</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($retur->details as $index => $detail)
-                            <tr>
-                                <td>{{ $index + 1 }}</td>
-                                <td>{{ $detail->obat->kode_obat }}</td>
-                                <td>{{ $detail->obat->nama_obat }}</td>
-                                <td>{{ $detail->jumlah }}</td>
-                                <td>Rp {{ number_format($detail->harga_satuan, 0, ',', '.') }}</td>
-                                <td>Rp {{ number_format($detail->subtotal, 0, ',', '.') }}</td>
-                                <td>{{ $detail->keterangan ?: '-' }}</td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td colspan="5" class="text-end fw-bold">Total:</td>
-                                <td colspan="2" class="fw-bold">Rp {{ number_format($retur->total_nilai_retur, 0, ',', '.') }}</td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-            </div>
+        
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>No. Retur</th>
+                    <th>Tanggal</th>
+                    <th>No. Faktur</th>
+                    <th>Supplier</th>
+                    <th>Jumlah Item</th>
+                    <th>Total Nilai Retur</th>
+                    <th>Petugas</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($returPembelian as $index => $retur)
+                <tr>
+                    <td>{{ $index + 1 }}</td>
+                    <td>RET-{{ str_pad($retur->id, 5, '0', STR_PAD_LEFT) }}</td>
+                    <td>{{ \Carbon\Carbon::parse($retur->tanggal_retur)->format('d/m/Y') }}</td>
+                    <td>{{ $retur->penerimaanPembelian->pembelian->kode_pembelian }}</td>
+                    <td>{{ $retur->penerimaanPembelian->pembelian->supplier->nama_supplier }}</td>
+                    <td>{{ $retur->items->count() }}</td>
+                    <td>Rp {{ number_format($retur->total_retur, 0, ',', '.') }}</td>
+                    <td>{{ $retur->user->name }}</td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="8" class="text-center">Tidak ada data retur pembelian pada periode ini</td>
+                </tr>
+                @endforelse
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="5" class="text-end fw-bold">Total Nilai Retur:</td>
+                    <td colspan="3" class="fw-bold">Rp {{ number_format($totalNilaiRetur, 0, ',', '.') }}</td>
+                </tr>
+            </tfoot>
+        </table>
+        
+        @if($returPembelian->isNotEmpty())
+        <h4 class="text-center mt-4">Detail Item Diretur</h4>
+        
+        @foreach ($returPembelian as $retur)
+        <div style="margin-bottom: 15px;">
+            <p><strong>No. Retur: RET-{{ str_pad($retur->id, 5, '0', STR_PAD_LEFT) }}</strong> | 
+               <strong>Tanggal:</strong> {{ \Carbon\Carbon::parse($retur->tanggal_retur)->format('d/m/Y') }} | 
+               <strong>No. Faktur:</strong> {{ $retur->penerimaanPembelian->pembelian->kode_pembelian }}</p>
+            
+            <table style="width: 100%; margin-top: 5px;">
+                <thead>
+                    <tr>
+                        <th width="5%">No.</th>
+                        <th width="15%">Kode Obat</th>
+                        <th width="25%">Nama Obat</th>
+                        <th width="10%">Jumlah</th>
+                        <th width="15%">Harga Satuan</th>
+                        <th width="15%">Subtotal</th>
+                        <th width="15%">Alasan Retur</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($retur->items as $index => $item)
+                    <tr>
+                        <td>{{ $index + 1 }}</td>
+                        <td>{{ $item->obat->kode_obat }}</td>
+                        <td>{{ $item->obat->nama_obat }}</td>
+                        <td>{{ $item->jumlah }}</td>
+                        <td>Rp {{ number_format($item->obat->harga_beli, 0, ',', '.') }}</td>
+                        <td>Rp {{ number_format($item->jumlah * $item->obat->harga_beli, 0, ',', '.') }}</td>
+                        <td>{{ $item->alasan_retur }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="5" class="text-end fw-bold">Total Retur:</td>
+                        <td colspan="2" class="fw-bold">Rp {{ number_format($retur->total_retur, 0, ',', '.') }}</td>
+                    </tr>
+                </tfoot>
+            </table>
         </div>
-    </div>
-</div>
-@endforeach
-
-@push('styles')
-<style>
-    @media print {
-        .btn, .modal, .modal-backdrop {
-            display: none !important;
-        }
-        
-        .card {
-            border: none !important;
-            box-shadow: none !important;
-        }
-        
-        .card-header {
-            background-color: white !important;
-            color: black !important;
-        }
-        
-        .table {
-            width: 100% !important;
-        }
-    }
-</style>
-@endpush
-@endsection
+        @endforeach
+        @endif
+</body>
+</html>

@@ -1,24 +1,26 @@
-<!-- resources/views/laporan/pembelian_tunai_pdf.blade.php -->
-@extends('layouts.laporan')
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Laporan Pembelian Tunai</title>
+    <style>
+        body { font-family: DejaVu Sans, sans-serif; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #000; padding: 8px; }
+        th { background-color: #f2f2f2; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .header { margin-bottom: 20px; text-align: center; }
+        .footer { margin-top: 20px; font-size: 0.8em; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Laporan Pembelian Tunai</h2>
+        <p>Periode: {{ $tanggalMulai->format('d/m/Y') }} - {{ $tanggalAkhir->format('d/m/Y') }}</p>
+    </div>
 
-@section('title', 'Laporan Pembelian Tunai')
-@section('subtitle', 'Periode: ' . $tanggalMulai->format('d/m/Y') . ' - ' . $tanggalAkhir->format('d/m/Y'))
-
-@section('content')
-<style>
-    body { font-family: Arial, sans-serif; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { border: 1px solid #ddd; padding: 8px; }
-    th { background-color: #f2f2f2; text-align: left; }
-    .text-center { text-align: center; }
-    .text-end { text-align: right; }
-    .fw-bold { font-weight: bold; }
-</style>
-
-<h2 style="text-align: center;">Laporan Pembelian Tunai</h2>
-<p style="text-align: center;">Periode: {{ $tanggalMulai->format('d/m/Y') }} - {{ $tanggalAkhir->format('d/m/Y') }}</p>
-<div class="container">
-    <table class="table table-bordered">
+    <table>
         <thead>
             <tr>
                 <th width="5%">No.</th>
@@ -38,7 +40,7 @@
                 <td>{{ $pembelian->supplier->nama_supplier }}</td>
                 <td>{{ \Carbon\Carbon::parse($pembelian->tanggal_pembelian)->format('d/m/Y') }}</td>
                 <td class="text-center">{{ $pembelian->detailPembelian->count() }}</td>
-                <td class="text-end">Rp {{ number_format($pembelian->total, 0, ',', '.') }}</td>
+                <td class="text-right">Rp {{ number_format($pembelian->total, 0, ',', '.') }}</td>
                 <td class="text-center">
                     @if($pembelian->status == 'dipesan')
                         Dipesan
@@ -57,12 +59,6 @@
             </tr>
             @endforelse
         </tbody>
-        <tfoot>
-            <tr>
-                <td colspan="5" class="text-end fw-bold">Total Pembelian Tunai:</td>
-                <td colspan="2" class="text-end fw-bold">Rp {{ number_format($totalPembelian, 0, ',', '.') }}</td>
-            </tr>
-        </tfoot>
     </table>
-</div>
-@endsection
+</body>
+</html>

@@ -1,236 +1,112 @@
-@extends('layouts.app')
-
-@section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Laporan Persediaan Obat</h5>
-                    <div>
-                        <a href="{{ route('laporan.index') }}" class="btn btn-secondary">Kembali</a>
-                    </div>
-                </div>
-
-                <div class="card-body">
-                    <!-- Filter Form -->
-                    <form method="GET" action="{{ route('laporan.persediaan-obat') }}" class="mb-4">
-                        <div class="row g-3 align-items-end">
-                            <div class="col-md-3">
-                                <label for="jenis_obat" class="form-label">Jenis Obat</label>
-                                <select class="form-control" id="jenis_obat" name="jenis_obat">
-                                    <option value="">Semua Jenis</option>
-                                    @foreach($jenisObatList as $jenis)
-                                        <option value="{{ $jenis }}" {{ $jenisObat == $jenis ? 'selected' : '' }}>
-                                            {{ $jenis }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="status_stok" class="form-label">Status Stok</label>
-                                <select class="form-control" id="status_stok" name="status_stok">
-                                    <option value="semua" {{ $statusStok == 'semua' ? 'selected' : '' }}>Semua</option>
-                                    <option value="tersedia" {{ $statusStok == 'tersedia' ? 'selected' : '' }}>Tersedia</option>
-                                    <option value="kosong" {{ $statusStok == 'kosong' ? 'selected' : '' }}>Kosong</option>
-                                    <option value="hampir_habis" {{ $statusStok == 'hampir_habis' ? 'selected' : '' }}>Hampir Habis</option>
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <label for="sort_by" class="form-label">Urutkan</label>
-                                <select class="form-control" id="sort_by" name="sort_by">
-                                    <option value="kode" {{ $sortBy == 'kode' ? 'selected' : '' }}>Kode Obat</option>
-                                    <option value="nama" {{ $sortBy == 'nama' ? 'selected' : '' }}>Nama Obat</option>
-                                    <option value="stok" {{ $sortBy == 'stok' ? 'selected' : '' }}>Stok</option>
-                                    <option value="kadaluarsa" {{ $sortBy == 'kadaluarsa' ? 'selected' : '' }}>Kadaluarsa</option>
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <label for="sort_order" class="form-label">Urutan</label>
-                                <select class="form-control" id="sort_order" name="sort_order">
-                                    <option value="asc" {{ $sortOrder == 'asc' ? 'selected' : '' }}>Naik (A-Z)</option>
-                                    <option value="desc" {{ $sortOrder == 'desc' ? 'selected' : '' }}>Turun (Z-A)</option>
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <button type="submit" class="btn btn-primary">Filter</button>
-                                <a href="{{ route('laporan.persediaan-obat') }}" class="btn btn-outline-secondary">Reset</a>
-                            </div>
-                        </div>
-                        <div class="mt-2 text-end">
-                            <button type="submit" name="export" value="pdf" class="btn btn-success" onclick="window.open(this.form.action + '?' + new URLSearchParams(new FormData(this.form)).toString() + '&export=pdf', '_blank'); return false;">
-                                <i class="bi bi-file-pdf"></i> Export PDF
-                            </button>
-                            <button type="button" class="btn btn-info" onclick="window.print()">
-                                <i class="bi bi-printer"></i> Print
-                            </button>
-                        </div>
-                    </form>
-
-                    <div class="alert alert-info">
-                        <strong>Jenis:</strong> {{ $jenisObat ? $jenisObat : 'Semua' }} | 
-                        <strong>Status:</strong> 
-                        @if($statusStok == 'semua')
-                            Semua
-                        @elseif($statusStok == 'tersedia')
-                            Tersedia
-                        @elseif($statusStok == 'kosong')
-                            Kosong
-                        @else
-                            Hampir Habis
-                        @endif
-                        | 
-                        <strong>Urutan:</strong> 
-                        @if($sortBy == 'kode')
-                            Kode Obat
-                        @elseif($sortBy == 'nama')
-                            Nama Obat
-                        @elseif($sortBy == 'stok')
-                            Stok
-                        @else
-                            Kadaluarsa
-                        @endif
-                        ({{ $sortOrder == 'asc' ? 'A-Z' : 'Z-A' }})
-                    </div>
-
-                    <div class="row mb-4">
-                        <div class="col-md-3">
-                            <div class="card bg-primary text-white">
-                                <div class="card-body">
-                                    <h6 class="card-title">Total Obat</h6>
-                                    <h4 class="mt-2">{{ $totalObat }} Jenis</h4>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-success text-white">
-                                <div class="card-body">
-                                    <h6 class="card-title">Obat Tersedia</h6>
-                                    <h4 class="mt-2">{{ $obatTersedia }} Jenis</h4>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-warning text-white">
-                                <div class="card-body">
-                                    <h6 class="card-title">Hampir Habis</h6>
-                                    <h4 class="mt-2">{{ $obatHampirHabis }} Jenis</h4>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-danger text-white">
-                                <div class="card-body">
-                                    <h6 class="card-title">Obat Kosong</h6>
-                                    <h4 class="mt-2">{{ $obatKosong }} Jenis</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h6 class="card-title">Total Stok Obat</h6>
-                                    <h4 class="mt-2">{{ number_format($totalStok, 0, ',', '.') }} Unit</h4>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h6 class="card-title">Total Nilai Persediaan</h6>
-                                    <h4 class="mt-2">Rp {{ number_format($totalNilai, 0, ',', '.') }}</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                    <th>No.</th>
-                                    <th>Kode Obat</th>
-                                    <th>Nama Obat</th>
-                                    <th>Jenis</th>
-                                    <th>Stok</th>
-                                    <th>Satuan</th>
-                                    <th>Harga Beli</th>
-                                    <th>Harga Jual</th>
-                                    <th>Kadaluarsa</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse ($obats as $index => $obat)
-                                <tr>
-                                    <td>{{ $index + 1 }}</td>
-                                    <td>{{ $obat->kode_obat }}</td>
-                                    <td>{{ $obat->nama_obat }}</td>
-                                    <td>{{ $obat->jenis_obat }}</td>
-                                    <td>{{ $obat->stok }}</td>
-                                    <td>{{ $obat->satuan ?? '-' }}</td>
-                                    <td>Rp {{ number_format($obat->harga_beli, 0, ',', '.') }}</td>
-                                    <td>Rp {{ number_format($obat->harga_jual, 0, ',', '.') }}</td>
-                                    <td>
-                                        @if($obat->kadaluarsa)
-                                            {{ \Carbon\Carbon::parse($obat->kadaluarsa)->format('d/m/Y') }}
-                                            @if(\Carbon\Carbon::parse($obat->kadaluarsa)->isPast())
-                                                <span class="badge bg-danger">Kadaluarsa</span>
-                                            @elseif(\Carbon\Carbon::parse($obat->kadaluarsa)->diffInMonths(now()) <= 3)
-                                                <span class="badge bg-warning">Segera Kadaluarsa</span>
-                                            @endif
-                                        @else
-                                            -
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @if($obat->stok <= 0)
-                                            <span class="badge bg-danger">Kosong</span>
-                                        @elseif($obat->stok <= 10)
-                                            <span class="badge bg-warning">Hampir Habis</span>
-                                        @else
-                                            <span class="badge bg-success">Tersedia</span>
-                                        @endif
-                                    </td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="10" class="text-center">Tidak ada data obat</td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Laporan Persediaan Obat</title>
+    <style>
+        body { font-family: DejaVu Sans, sans-serif; font-size: 10pt; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #000; padding: 5px; }
+        th { background-color: #f2f2f2; text-align: center; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .header { text-align: center; margin-bottom: 15px; border-bottom: 1px solid #000; }
+        .summary { margin-bottom: 15px; }
+        .summary-table { width: 100%; border-collapse: collapse; }
+        .summary-table td { border: none; padding: 3px; }
+        .danger { background-color: #ffdddd; }
+        .warning { background-color: #fff3cd; }
+        .success { background-color: #d4edda; }
+        .small-text { font-size: 8pt; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>LAPORAN PERSEDIAAN OBAT</h1>
+        <p>Dicetak pada: {{ now()->format('d/m/Y H:i') }}</p>
+        
+        @if($jenisObat || $statusStok != 'semua')
+        <p>
+            Filter: 
+            @if($jenisObat) Jenis Obat: {{ $jenisObat }} | @endif
+            @if($statusStok != 'semua') Status Stok: {{ ucfirst(str_replace('_', ' ', $statusStok)) }} @endif
+        </p>
+        @endif
     </div>
-</div>
 
-@push('styles')
-<style>
-    @media print {
-        .btn {
-            display: none !important;
-        }
-        
-        .card {
-            border: none !important;
-            box-shadow: none !important;
-        }
-        
-        .card-header {
-            background-color: white !important;
-            color: black !important;
-        }
-        
-        .table {
-            width: 100% !important;
-        }
-    }
-</style>
-@endpush
-@endsection
+    <div class="summary">
+        <table class="summary-table">
+            <tr>
+                <td><strong>Total Obat:</strong> {{ $totalObat }}</td>
+                <td><strong>Total Stok:</strong> {{ $totalStok }}</td>
+                <td><strong>Total Nilai Persediaan:</strong> Rp {{ number_format($totalNilai, 0, ',', '.') }}</td>
+            </tr>
+            <tr>
+                <td><strong>Tersedia:</strong> {{ $obatTersedia }}</td>
+                <td><strong>Hampir Habis:</strong> {{ $obatHampirHabis }}</td>
+                <td><strong>Kosong:</strong> {{ $obatKosong }}</td>
+            </tr>
+            <tr>
+                <td colspan="3"><strong>Obat Kadaluarsa:</strong> {{ $obatKadaluarsa }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th width="5%">No</th>
+                <th width="10%">Kode Obat</th>
+                <th width="20%">Nama Obat</th>
+                <th width="10%">Jenis</th>
+                <th width="8%">Stok</th>
+                <th width="12%">Harga Beli</th>
+                <th width="12%">Harga Jual</th>
+                <th width="13%">Kadaluarsa</th>
+                <th width="10%">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($obats as $index => $obat)
+            @php
+                $rowClass = '';
+                if ($obat->stok <= 0) {
+                    $rowClass = 'danger';
+                } elseif ($obat->kadaluarsa < now()) {
+                    $rowClass = 'danger';
+                } elseif ($obat->stok <= 10) {
+                    $rowClass = 'warning';
+                }
+            @endphp
+            <tr class="{{ $rowClass }}">
+                <td class="text-center">{{ $index + 1 }}</td>
+                <td>{{ $obat->kode_obat }}</td>
+                <td>{{ $obat->nama_obat }}</td>
+                <td>{{ $obat->jenis_obat }}</td>
+                <td class="text-center">{{ $obat->stok }}</td>
+                <td class="text-right">Rp {{ number_format($obat->harga_beli, 0, ',', '.') }}</td>
+                <td class="text-right">Rp {{ number_format($obat->harga_jual, 0, ',', '.') }}</td>
+                <td class="text-center">{{ \Carbon\Carbon::parse($obat->kadaluarsa)->format('d/m/Y') }}</td>
+                <td class="text-center">
+                    @if($obat->kadaluarsa < now())
+                        Kadaluarsa
+                    @elseif($obat->stok <= 0)
+                        Kosong
+                    @elseif($obat->stok <= 10)
+                        Hampir Habis
+                    @else
+                        Tersedia
+                    @endif
+                </td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+
+    <div style="margin-top: 20px; font-size: 8pt;">
+        <p><strong>Keterangan:</strong></p>
+        <p>- <span style="background-color: #ffdddd;">Warna merah</span>: Obat kosong atau sudah kadaluarsa</p>
+        <p>- <span style="background-color: #fff3cd;">Warna kuning</span>: Stok hampir habis (≤10)</p>
+    </div>
+</body>
+</html>

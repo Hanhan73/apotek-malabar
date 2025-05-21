@@ -17,68 +17,57 @@
                     <form method="GET" action="{{ route('laporan.penjualan') }}" class="mb-4">
                         <div class="row g-3 align-items-end">
                             <div class="col-md-3">
-                                <label for="tanggal_mulai" class="form-label">Tanggal Mulai</label>
-                                <input type="date" class="form-control" id="tanggal_mulai" name="tanggal_mulai" value="{{ request('tanggal_mulai', $tanggalMulai->format('Y-m-d')) }}">
+                                <label for="bulan" class="form-label">Bulan</label>
+                                <input type="month" class="form-control" id="bulan" name="bulan" 
+                                       value="{{ request('bulan', date('Y-m')) }}">
                             </div>
                             <div class="col-md-3">
-                                <label for="tanggal_akhir" class="form-label">Tanggal Akhir</label>
-                                <input type="date" class="form-control" id="tanggal_akhir" name="tanggal_akhir" value="{{ request('tanggal_akhir', $tanggalAkhir->format('Y-m-d')) }}">
-                            </div>
-                            <div class="col-md-2">
                                 <label for="jenis_penjualan" class="form-label">Jenis Penjualan</label>
                                 <select class="form-control" id="jenis_penjualan" name="jenis_penjualan">
-                                    <option value="semua" {{ $jenisPenjualan == 'semua' ? 'selected' : '' }}>Semua</option>
-                                    <option value="dengan_resep" {{ $jenisPenjualan == 'dengan_resep' ? 'selected' : '' }}>Dengan Resep</option>
-                                    <option value="tanpa_resep" {{ $jenisPenjualan == 'tanpa_resep' ? 'selected' : '' }}>Tanpa Resep</option>
+                                    <option value="semua" {{ request('jenis_penjualan') == 'semua' ? 'selected' : '' }}>Semua Jenis</option>
+                                    <option value="dengan_resep" {{ request('jenis_penjualan') == 'dengan_resep' ? 'selected' : '' }}>Dengan Resep</option>
+                                    <option value="tanpa_resep" {{ request('jenis_penjualan') == 'tanpa_resep' ? 'selected' : '' }}>Tanpa Resep</option>
                                 </select>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <button type="submit" class="btn btn-primary">Filter</button>
                                 <a href="{{ route('laporan.penjualan') }}" class="btn btn-outline-secondary">Reset</a>
-                                <button type="submit" name="export" value="pdf" class="btn btn-success" onclick="window.open(this.form.action + '?' + new URLSearchParams(new FormData(this.form)).toString() + '&export=pdf', '_blank'); return false;">
+                                <button type="submit" name="export" value="pdf" class="btn btn-success">
                                     <i class="bi bi-file-pdf"></i> Export PDF
-                                </button>
-                                <button type="button" class="btn btn-info" onclick="window.print()">
-                                    <i class="bi bi-printer"></i> Print
                                 </button>
                             </div>
                         </div>
                     </form>
 
                     <div class="alert alert-info">
-                        <strong>Periode:</strong> {{ $tanggalMulai->format('d/m/Y') }} - {{ $tanggalAkhir->format('d/m/Y') }} | 
-                        <strong>Jenis Penjualan:</strong> 
-                        @if($jenisPenjualan == 'semua')
-                            Semua
-                        @elseif($jenisPenjualan == 'dengan_resep')
-                            Dengan Resep
-                        @else
-                            Tanpa Resep
+                        <strong>Periode:</strong> Bulan {{ \Carbon\Carbon::parse($bulan)->translatedFormat('F Y') }}
+                        @if($jenisPenjualan != 'semua')
+                            | Jenis: {{ $jenisPenjualan == 'dengan_resep' ? 'Dengan Resep' : 'Tanpa Resep' }}
                         @endif
                     </div>
 
                     <div class="row mb-4">
                         <div class="col-md-4">
-                            <div class="card bg-primary text-white">
+                            <div class="card">
                                 <div class="card-body">
-                                    <h6 class="card-title">Total Penjualan</h6>
-                                    <h4 class="mt-2">Rp {{ number_format($totalPenjualan, 0, ',', '.') }}</h4>
+                                    <h5 class="card-title">Total Penjualan</h5>
+                                    <p class="card-text">Rp {{ number_format($totalPenjualan, 0, ',', '.') }}</p>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="card bg-info text-white">
+                            <div class="card">
                                 <div class="card-body">
-                                    <h6 class="card-title">Penjualan Dengan Resep</h6>
-                                    <h4 class="mt-2">Rp {{ number_format($totalDenganResep, 0, ',', '.') }}</h4>
+                                    <h5 class="card-title">Dengan Resep</h5>
+                                    <p class="card-text">Rp {{ number_format($totalDenganResep, 0, ',', '.') }}</p>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="card bg-success text-white">
+                            <div class="card">
                                 <div class="card-body">
-                                    <h6 class="card-title">Penjualan Tanpa Resep</h6>
-                                    <h4 class="mt-2">Rp {{ number_format($totalTanpaResep, 0, ',', '.') }}</h4>
+                                    <h5 class="card-title">Tanpa Resep</h5>
+                                    <p class="card-text">Rp {{ number_format($totalTanpaResep, 0, ',', '.') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -94,8 +83,8 @@
                                     <th>Jenis</th>
                                     <th>Jumlah Item</th>
                                     <th>Total Harga</th>
-                                    <th>Status</th>
-                                    <th>Petugas</th>
+                                    <th>Status Pembayaran</th>
+                                    <th>Kasir</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
@@ -104,12 +93,12 @@
                                 <tr>
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ $item->nomor_nota }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($item->tanggal)->format('d/m/Y') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($item->tanggal)->format('d/m/Y H:i') }}</td>
                                     <td>
                                         @if($item->jenis_penjualan == 'dengan_resep')
                                             <span class="badge bg-info">Dengan Resep</span>
                                         @else
-                                            <span class="badge bg-secondary">Tanpa Resep</span>
+                                            <span class="badge bg-primary">Tanpa Resep</span>
                                         @endif
                                     </td>
                                     <td>{{ $item->details->count() }}</td>
@@ -142,7 +131,7 @@
     </div>
 </div>
 
-<!-- Modal Detail untuk setiap penjualan -->
+<!-- Modal Detail -->
 @foreach ($penjualan as $item)
 <div class="modal fade" id="detailModal{{ $item->id }}" tabindex="-1" aria-labelledby="detailModalLabel{{ $item->id }}" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -154,34 +143,32 @@
             <div class="modal-body">
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <p><strong>Tanggal:</strong> {{ \Carbon\Carbon::parse($item->tanggal)->format('d/m/Y') }}</p>
-                        <p>
-                            <strong>Jenis Penjualan:</strong> 
+                        <p><strong>No. Nota:</strong> {{ $item->nomor_nota }}</p>
+                        <p><strong>Tanggal:</strong> {{ \Carbon\Carbon::parse($item->tanggal)->format('d/m/Y H:i') }}</p>
+                        <p><strong>Jenis:</strong> 
                             @if($item->jenis_penjualan == 'dengan_resep')
-                                <span class="badge bg-info">Dengan Resep</span>
+                                Dengan Resep
                             @else
-                                <span class="badge bg-secondary">Tanpa Resep</span>
+                                Tanpa Resep
                             @endif
                         </p>
-                        <p><strong>Petugas:</strong> {{ $item->user->name }}</p>
                     </div>
                     <div class="col-md-6">
-                        <p><strong>No. Nota:</strong> {{ $item->nomor_nota }}</p>
                         <p><strong>Total Harga:</strong> Rp {{ number_format($item->total_harga, 0, ',', '.') }}</p>
-                        <p>
-                            <strong>Status Pembayaran:</strong> 
+                        <p><strong>Status Pembayaran:</strong> 
                             @if($item->status_pembayaran == 'sudah_dibayar')
                                 <span class="badge bg-success">Sudah Dibayar</span>
                             @else
                                 <span class="badge bg-warning">Belum Dibayar</span>
                             @endif
                         </p>
+                        <p><strong>Kasir:</strong> {{ $item->user->name }}</p>
                     </div>
                 </div>
 
                 <h6 class="fw-bold mb-3">Daftar Obat</h6>
                 <div class="table-responsive">
-                    <table class="table table-bordered table-striped">
+                    <table class="table table-bordered">
                         <thead>
                             <tr>
                                 <th>No.</th>
@@ -220,28 +207,4 @@
     </div>
 </div>
 @endforeach
-
-@push('styles')
-<style>
-    @media print {
-        .btn, .modal, .modal-backdrop {
-            display: none !important;
-        }
-        
-        .card {
-            border: none !important;
-            box-shadow: none !important;
-        }
-        
-        .card-header {
-            background-color: white !important;
-            color: black !important;
-        }
-        
-        .table {
-            width: 100% !important;
-        }
-    }
-</style>
-@endpush
 @endsection

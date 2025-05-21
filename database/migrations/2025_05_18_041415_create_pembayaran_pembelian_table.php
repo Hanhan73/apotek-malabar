@@ -18,6 +18,8 @@ return new class extends Migration
             $table->integer('jumlah_bayar');
             $table->enum('metode_pembayaran', ['tunai', 'kredit']);
             $table->enum('status', ['lunas', 'belum lunas']);
+            $table->decimal('sisa_hutang', 12, 2);
+            $table->text('catatan');
             $table->foreignId('user_id')->constrained('users');
             $table->timestamps();
         });

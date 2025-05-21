@@ -34,6 +34,8 @@
                         <div class="col-7">: {{ ucfirst($pembelian->jenis_pembayaran) }}</div>
                     </div>
                 </div>
+
+
             </div>
             <div class="col-md-6">
                 <div class="border p-3 rounded bg-light">
@@ -105,37 +107,57 @@
         </div>
         @endif
     </div>
-    <div class="card-footer d-flex justify-content-between">
-        <div>
-            @if($pembelian->status == 'dipesan')
-                <button class="btn btn-success btn-penerimaan" data-id="{{ $pembelian->id }}">
-                    <i class="bi bi-check-circle"></i> Proses Penerimaan
-                </button>
-                <button class="btn btn-danger btn-tolak" data-id="{{ $pembelian->id }}">
-                    <i class="bi bi-x-circle"></i> Tolak Pembelian
-                </button>
+                    @if($pembelian->jenis_pembayaran == 'kredit')
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 bg-warning text-dark">
+                        <h6 class="m-0 font-weight-bold">Informasi Kredit</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="row mb-2">
+                                    <div class="col-md-5">Total Pembelian</div>
+                                    <div class="col-md-7 font-weight-bold">: Rp {{ number_format($pembelian->total, 0, ',', '.') }}</div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-md-5">Total Pembayaran</div>
+                                    <div class="col-md-7">: Rp {{ number_format($pembelian->total - ($pembelian->sisa_pembayaran ?? $pembelian->total), 0, ',', '.') }}</div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-md-5">Sisa Hutang</div>
+                                    <div class="col-md-7 font-weight-bold text-{{ ($pembelian->sisa_pembayaran ?? $pembelian->total) > 0 ? 'danger' : 'success' }}">
+                                        : Rp {{ number_format($pembelian->sisa_pembayaran ?? $pembelian->total, 0, ',', '.') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row mb-2">
+                                    <div class="col-md-5">Tanggal Pembelian</div>
+                                    <div class="col-md-7">: {{ $pembelian->tanggal_pembelian->format('d/m/Y') }}</div>
+                                </div>
+                                @if($pembelian->tanggal_jatuh_tempo)
+                                <div class="row mb-2">
+                                    <div class="col-md-5">Jatuh Tempo</div>
+                                    <div class="col-md-7">: {{ \Carbon\Carbon::parse($pembelian->tanggal_jatuh_tempo)->format('d/m/Y') }}</div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-md-5">Status</div>
+                                    <div class="col-md-7">
+                                        @if(($pembelian->sisa_pembayaran ?? $pembelian->total) <= 0)
+                                            <span class="badge bg-success">Lunas</span>
+                                        @elseif($pembelian->tanggal_jatuh_tempo && \Carbon\Carbon::parse($pembelian->tanggal_jatuh_tempo) < now())
+                                            <span class="badge bg-danger">Telat {{ now()->diffInDays(\Carbon\Carbon::parse($pembelian->tanggal_jatuh_tempo)) }} hari</span>
+                                        @else
+                                            <span class="badge bg-warning">Belum Lunas</span>
+                                        @endif
+                                    </div>
+                                </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
             @endif
-            
-            @if($pembelian->status == 'diterima' && $pembelian->jenis_pembayaran == 'kredit')
-                <button class="btn btn-info btn-pembayaran" data-id="{{ $pembelian->id }}">
-                    <i class="bi bi-credit-card"></i> Pembayaran
-                </button>
-            @endif
-        
-        </div>
-        <div>
-
-            @if($pembelian->status == 'dipesan')
-            <form action="{{ route('pembelian.destroy', $pembelian->id) }}" method="POST" class="d-inline">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="btn btn-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus pembelian ini?')">
-                    <i class="bi bi-trash"></i> Hapus
-                </button>
-            </form>
-            @endif
-        </div>
-    </div>
 </div>
 
 <!-- Modal Penerimaan -->

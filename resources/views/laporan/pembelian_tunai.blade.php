@@ -14,7 +14,6 @@
 
                 <div class="card-body">
                     <!-- Filter Form -->
-<!-- resources/views/laporan/pembelian_tunai.blade.php -->
                             <form method="GET" action="{{ route('laporan.pembelian-tunai') }}" class="mb-4">
                                 <div class="row g-3 align-items-end">
                                     <div class="col-md-4">

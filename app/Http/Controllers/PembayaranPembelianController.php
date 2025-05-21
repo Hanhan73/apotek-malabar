@@ -33,63 +33,67 @@ class PembayaranPembelianController extends Controller
 
     public function store(Request $request)
 {
-    // Log the incoming request data
-    \Log::info('Incoming request data:', $request->all());
-
-    // Konversi format Rupiah ke integer
-    $jumlah_bayar = str_replace(['Rp', '.', ' '], '', $request->jumlah_bayar);
-    $request->merge(['jumlah_bayar' => (int)$jumlah_bayar]);
-
-    // Validasi
+    // Validasi request
     $request->validate([
         'penerimaan_pembelian_id' => 'required|exists:penerimaan_pembelian,id',
         'tanggal_bayar' => 'required|date',
-        'jumlah_bayar' => 'required|integer|min:1',
+        'jumlah_bayar' => 'required|numeric|min:1',
         'metode_pembayaran' => 'required|in:tunai,kredit',
-        'status' => 'required|in:lunas,belum lunas',
+        'catatan' => 'nullable|string',
     ]);
 
-    DB::beginTransaction();
+    // Konversi format Rupiah ke integer jika perlu
+    $jumlah_bayar = str_replace(['Rp', '.', ' '], '', $request->jumlah_bayar);
+    $request->merge(['jumlah_bayar' => (int)$jumlah_bayar]);
 
+    DB::beginTransaction();
     try {
         $penerimaan = PenerimaanPembelian::with('pembelian')->findOrFail($request->penerimaan_pembelian_id);
+        $pembelian = $penerimaan->pembelian;
         
-        $totalHarga = $penerimaan->pembelian->total;
+        // Dapatkan total hutang yang masih tersisa
+        $totalHarga = $pembelian->total;
         $totalSudahDibayar = $penerimaan->pembayaran()->sum('jumlah_bayar');
         $sisaPembayaran = $totalHarga - $totalSudahDibayar;
-
-        // Log the payment details
-        \Log::info('Payment details:', [
-            'totalHarga' => $totalHarga,
-            'totalSudahDibayar' => $totalSudahDibayar,
-            'sisaPembayaran' => $sisaPembayaran,
-            'jumlah_bayar' => $request->jumlah_bayar,
-        ]);
-
+        
+        // Validasi jumlah pembayaran
         if ($request->jumlah_bayar > $sisaPembayaran) {
-            return back()->withInput()->with('error', 'Jumlah pembayaran Rp '.number_format($request->jumlah_bayar, 0, ',','.').' melebihi sisa yang harus dibayar Rp '.number_format($sisaPembayaran, 0, ',','.'));
+            return back()->withInput()->with('error', 'Jumlah pembayaran melebihi sisa yang harus dibayar');
         }
-
+        
+        // Hitung sisa hutang setelah pembayaran ini
+        $sisaHutangBaru = $sisaPembayaran - $request->jumlah_bayar;
+        
+        // Tentukan status pembayaran
+        $status = ($sisaHutangBaru <= 0) ? 'lunas' : 'belum_lunas';
+        
+        // Simpan pembayaran
         $pembayaran = PembayaranPembelian::create([
             'penerimaan_pembelian_id' => $request->penerimaan_pembelian_id,
             'tanggal_bayar' => $request->tanggal_bayar,
             'jumlah_bayar' => $request->jumlah_bayar,
+            'sisa_hutang' => $sisaHutangBaru,
             'metode_pembayaran' => $request->metode_pembayaran,
-            'status' => ($request->jumlah_bayar >= $sisaPembayaran) ? 'lunas' : $request->status,
+            'status' => $status,
+            'catatan' => $request->catatan,
             'user_id' => Auth::id(),
         ]);
-
+        
+        // Update sisa pembayaran dan status di tabel pembelian
+        $pembelian->update([
+            'sisa_pembayaran' => $sisaHutangBaru,
+            'status_pembayaran' => $status
+        ]);
+        
         DB::commit();
-
+        
         return redirect()->route('pembayaran-pembelian.show', $pembayaran->id)
             ->with('success', 'Pembayaran berhasil disimpan');
     } catch (\Exception $e) {
         DB::rollBack();
-        // Log the exception message
-        \Log::error('Error saving payment:', ['message' => $e->getMessage(), 'request' => $request->all()]);
         return back()->withInput()->with('error', 'Gagal menyimpan: ' . $e->getMessage());
     }
-}
+}   
 
     public function show($id)
     {
