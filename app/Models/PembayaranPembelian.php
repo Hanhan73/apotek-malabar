@@ -8,13 +8,21 @@ class PembayaranPembelian extends Model
 {
     protected $table = 'pembayaran_pembelian';
 
-    protected $fillable = [
+ protected $fillable = [
         'penerimaan_pembelian_id',
         'tanggal_bayar',
         'jumlah_bayar',
         'metode_pembayaran',
         'status',
+        'sisa_hutang',
+        'catatan',
         'user_id'
+    ];
+
+    protected $casts = [
+        'tanggal_bayar' => 'date',
+        'jumlah_bayar' => 'integer',
+        'sisa_hutang' => 'integer'
     ];
 
     public function penerimaanPembelian()
@@ -25,5 +33,16 @@ class PembayaranPembelian extends Model
     {
         return $this->belongsTo(User::class);
     }
+public function pembayaran()
+{
+    return $this->hasOneThrough(
+        \App\Models\PembayaranPembelian::class,
+        \App\Models\PenerimaanPembelian::class,
+        'pembelian_id', // FK di penerimaan_pembelian yang menunjuk ke pembelian
+        'penerimaan_pembelian_id', // FK di pembayaran_pembelian yang menunjuk ke penerimaan_pembelian
+        'id', // PK pembelian
+        'id'  // PK penerimaan_pembelian
+    );
+}
 }
 

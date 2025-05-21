@@ -29,44 +29,59 @@ class LaporanController extends Controller
      * Laporan Pembelian Tunai
      */
       public function pembelianTunai(Request $request)
-    {
-        $request->validate([
-            'bulan' => 'nullable|date_format:Y-m', // Format: YYYY-MM
-        ]);
+{
+    $request->validate([
+        'bulan' => 'nullable|date_format:Y-m', // Format: YYYY-MM
+        'supplier_id' => 'nullable|exists:suppliers,id',
+    ]);
 
-        // Default bulan berjalan jika tidak diisi
-        $bulan = $request->bulan ?? Carbon::now()->format('Y-m');
-        
-        // Parse bulan dan tentukan tanggal awal-akhir bulan
-        $tanggalMulai = Carbon::parse($bulan)->startOfMonth();
-        $tanggalAkhir = Carbon::parse($bulan)->endOfMonth();
+    // Default bulan berjalan jika tidak diisi
+    $bulan = $request->bulan ?? Carbon::now()->format('Y-m');
+    $supplierId = $request->supplier_id;
+    
+    // Parse bulan dan tentukan tanggal awal-akhir bulan
+    $tanggalMulai = Carbon::parse($bulan)->startOfMonth();
+    $tanggalAkhir = Carbon::parse($bulan)->endOfMonth();
 
-        $pembelianTunai = Pembelian::with(['supplier', 'detailPembelian.obat', 'users'])
-            ->where('jenis_pembayaran', 'tunai')
-            ->whereBetween('tanggal_pembelian', [$tanggalMulai, $tanggalAkhir])
-            ->orderBy('tanggal_pembelian')
-            ->get();
+    $query = Pembelian::with(['supplier', 'detailPembelian.obat', 'user'])
+        ->where('jenis_pembayaran', 'tunai')
+        ->whereBetween('tanggal_pembelian', [$tanggalMulai, $tanggalAkhir]);
 
-        $totalPembelian = $pembelianTunai->sum('total');
-        
-        if ($request->has('export') && $request->export == 'pdf') {
-            return Pdf::loadView('laporan.pembelian_tunai_pdf', [
-                'pembelianTunai' => $pembelianTunai,
-                'totalPembelian' => $totalPembelian,
-                'bulan' => $bulan, // Kirim bulan ke view
-                'tanggalMulai' => $tanggalMulai,
-                'tanggalAkhir' => $tanggalAkhir
-            ])->download('laporan_pembelian_tunai_'.$bulan.'.pdf');
-        }
-
-        return view('laporan.pembelian_tunai', compact(
-            'pembelianTunai', 
-            'totalPembelian',
-            'bulan',
-            'tanggalMulai',
-            'tanggalAkhir'
-        ));
+    // Filter berdasarkan supplier jika dipilih
+    if ($supplierId) {
+        $query->where('supplier_id', $supplierId);
     }
+
+    $pembelianTunai = $query->orderBy('tanggal_pembelian')->get();
+    $suppliers = Supplier::orderBy('nama_supplier')->get();
+
+    $totalPembelian = $pembelianTunai->sum('total');
+    
+    // Export PDF
+    if ($request->has('export') && $request->export == 'pdf') {
+        return Pdf::loadView('laporan.pembelian_tunai_pdf', [
+            'pembelianTunai' => $pembelianTunai,
+            'totalPembelian' => $totalPembelian,
+            'bulan' => $bulan,
+            'supplierId' => $supplierId,
+            'suppliers' => $suppliers,
+            'tanggalMulai' => $tanggalMulai,
+            'tanggalAkhir' => $tanggalAkhir
+        ])
+        ->setPaper('a4', 'landscape')
+        ->download('laporan_pembelian_tunai_'.$bulan.'.pdf');
+    }
+
+    return view('laporan.pembelian_tunai', compact(
+        'pembelianTunai',
+        'totalPembelian',
+        'bulan',
+        'supplierId',
+        'suppliers',
+        'tanggalMulai',
+        'tanggalAkhir'
+    ));
+}
 
     /**
      * Laporan Pembelian Kredit
@@ -86,7 +101,7 @@ class LaporanController extends Controller
     $tanggalMulai = Carbon::parse($bulan)->startOfMonth();
     $tanggalAkhir = Carbon::parse($bulan)->endOfMonth();
 
-    $query = Pembelian::with(['supplier', 'detailPembelian.obat', 'users', 'pembayaran'])
+    $query = Pembelian::with(['supplier', 'detailPembelian.obat', 'users', 'pembayaran', 'penerimaan'])
         ->where('jenis_pembayaran', 'kredit')
         ->whereBetween('tanggal_pembelian', [$tanggalMulai, $tanggalAkhir]);
 

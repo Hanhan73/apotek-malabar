@@ -336,97 +336,23 @@ body {
 }
 
 
-/* Style untuk print dan PDF export */
-@media print {
-    /* Menyembunyikan elemen yang tidak perlu saat print */
-    .sidebar, 
-    .topbar, 
-    .card-header button, 
-    .card-header a, 
-    .btn,
-    .navbar-toggler,
-    footer,
-    form[method="GET"],
-    .modal,
-    .modal-backdrop {
-        display: none !important;
-    }
-    
-    /* Mengatur content wrapper agar tampil penuh */
-    .content-wrapper {
-        margin-left: 0 !important;
-        width: 100% !important;
-        padding: 0 !important;
-    }
-    
-    /* Card styling */
-    .card {
-        border: none !important;
-        box-shadow: none !important;
-    }
-    
-    .card-header {
-        background-color: white !important;
-        color: black !important;
-        border-bottom: 1px solid #ddd !important;
-        padding: 15px 0 !important;
-    }
-    
-    /* Table styling */
-    .table {
-        width: 100% !important;
-        border-collapse: collapse !important;
-    }
-    
-    .table th, 
-    .table td {
-        border: 1px solid #ddd !important;
-    }
-    
-    /* Print title */
-    .print-title {
-        text-align: center;
-        font-size: 18pt;
-        font-weight: bold;
-        margin-bottom: 10px;
-        display: block !important;
-    }
-    
-    .print-subtitle {
-        text-align: center;
-        font-size: 14pt;
-        margin-bottom: 20px;
-        display: block !important;
-    }
-    
-    /* Hide elements with no-print class */
-    .no-print {
-        display: none !important;
-    }
-    
-    /* Show elements with print-only class */
-    .print-only {
-        display: block !important;
-    }
-    
-    /* Mengatur halaman */
-    @page {
-        size: A4;
-        margin: 2cm;
-    }
-    
-    /* Container full width */
-    .container, 
-    .container-fluid {
-        width: 100% !important;
-        max-width: 100% !important;
-        padding: 0 !important;
-    }
-    
-    /* Extra space at bottom */
-    body::after {
-        content: "";
-        display: block;
-        height: 20px;
-    }
+.nav-link {
+    transition: all 0.3s;
+    border-left: 3px solid transparent;
+}
+
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-link.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-left: 3px solid #0d6efd;
+    font-weight: 500;
+}
+
+.nav-link.text-muted {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
 }

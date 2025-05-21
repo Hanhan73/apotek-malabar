@@ -50,14 +50,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/pembelian/{id}/detail', function($id) {
     $pembelian = Pembelian::with(['detailPembelian.obat'])->findOrFail($id);
     return response()->json($pembelian);
-});
-    // // Pembayaran
-    // Route::resource('pembayaran', PembayaranPembelianController::class)->only(['index', 'show'])
-    //     ->middleware('peran:admin');
-    // Route::post('/pembelian/{id}/bayar', [PembayaranPembelianController::class, 'store'])
-    //     ->name('pembayaran.store')->middleware('peran:admin');
-    // Route::get('/pembelian/{id}/bayar', [PembayaranPembelianController::class, 'create'])
-    //     ->name('pembayaran.create')->middleware('peran:admin');
+    });
+
 });
 
 require __DIR__.'/auth.php';

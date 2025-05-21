@@ -1,167 +1,235 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <h2>Detail Pembayaran Pembelian</h2>
-    
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
-            Informasi Pembayaran
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <p><strong>No. Pembelian:</strong> {{ $pembayaran->penerimaanPembelian->pembelian->kode_pembelian ?? '-' }}</p>
-                    <p><strong>Supplier:</strong> {{ $pembayaran->penerimaanPembelian->pembelian->supplier->nama_supplier }}</p>
-                    <p><strong>Total Harga:</strong> Rp {{ number_format($pembayaran->penerimaanPembelian->pembelian->total, 0, ',', '.') }}</p>
-                </div>
-                <div class="col-md-6">
-                    <p><strong>Tanggal Bayar:</strong> {{ \Carbon\Carbon::parse($pembayaran->tanggal_bayar)->format('d/m/Y') }}</p>
-                    <p><strong>Jumlah Bayar:</strong> Rp {{ number_format($pembayaran->jumlah_bayar, 0, ',', '.') }}</p>
-                    <p><strong>Metode Pembayaran:</strong> {{ ucfirst($pembayaran->metode_pembayaran) }}</p>
-                    <p>
-                        <strong>Status:</strong> 
-                        
-                        <strong class="badge badge-{{ $pembayaran->status == 'lunas' ? 'success' : 'warning' }}">
-                            {{ ucfirst($pembayaran->status) }}
-                        </strong>
-                    </p>
-                </div>
-            </div>
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <h2>Detail Pembayaran Pembelian</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ route('pembayaran-pembelian.index') }}">Pembayaran Pembelian</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Detail</li>
+                </ol>
+            </nav>
         </div>
     </div>
     
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
-            Detail Barang
-        </div>
-        <div class="card-body">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Nama Obat</th>
-                        <th>Jumlah</th>
-                        <th>Harga Satuan</th>
-                        <th>Subtotal</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($pembayaran->penerimaanPembelian->pembelian->detailPembelian as $key => $item)
-                    <tr>
-                        <td>{{ $key + 1 }}</td>
-                        <td>{{ $item->obat->nama_obat }} ({{ $item->obat->kode_obat }})</td>
-                        <td>{{ $item->jumlah }}</td>
-                        <td>Rp {{ number_format($item->harga_satuan, 0, ',', '.') }}</td>
-                        <td>Rp {{ number_format($item->jumlah * $item->harga_satuan, 0, ',', '.') }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <th colspan="4" class="text-right">Total</th>
-                        <th>Rp {{ number_format($pembayaran->penerimaanPembelian->pembelian->total, 0, ',', '.') }}</th>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-    </div>
-
-    @if($pembelian->jenis_pembayaran == 'kredit')
-<div class="card shadow mb-4">
-    <div class="card-header py-3 bg-warning text-dark">
-        <h6 class="m-0 font-weight-bold">Informasi Kredit</h6>
-    </div>
-    <div class="card-body">
-        <div class="row">
-            <div class="col-md-6">
-                <div class="row mb-2">
-                    <div class="col-md-5">Total Pembelian</div>
-                    <div class="col-md-7 font-weight-bold">: Rp {{ number_format($pembelian->total, 0, ',', '.') }}</div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Informasi Pembayaran</h5>
                 </div>
-                <div class="row mb-2">
-                    <div class="col-md-5">Total Pembayaran</div>
-                    <div class="col-md-7">: Rp {{ number_format($pembelian->total - ($pembelian->sisa_pembayaran ?? $pembelian->total), 0, ',', '.') }}</div>
-                </div>
-                <div class="row mb-2">
-                    <div class="col-md-5">Sisa Hutang</div>
-                    <div class="col-md-7 font-weight-bold text-{{ ($pembelian->sisa_pembayaran ?? $pembelian->total) > 0 ? 'danger' : 'success' }}">
-                        : Rp {{ number_format($pembelian->sisa_pembayaran ?? $pembelian->total, 0, ',', '.') }}
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h6>Informasi Pembelian</h6>
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <td width="40%">No. Pembelian</td>
+                                        <td>: {{ $pembayaran->penerimaanPembelian->pembelian->kode_pembelian }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Supplier</td>
+                                        <td>: {{ $pembayaran->penerimaanPembelian->pembelian->supplier->nama_supplier }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Total Harga</td>
+                                        <td>: Rp {{ number_format($pembayaran->penerimaanPembelian->pembelian->total, 0, ',', '.') }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h6>Detail Pembayaran</h6>
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <td width="40%">Tanggal Bayar</td>
+                                        <td>: {{ \Carbon\Carbon::parse($pembayaran->tanggal_bayar)->format('d/m/Y') }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Jumlah Bayar</td>
+                                        <td>: Rp {{ number_format($pembayaran->jumlah_bayar, 0, ',', '.') }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Metode Pembayaran</td>
+                                        <td>: {{ ucfirst($pembayaran->metode_pembayaran) }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Status</td>
+                                        <td>
+                                            : <span class="badge bg-{{ $pembayaran->status == 'lunas' ? 'success' : 'warning' }}">
+                                                {{ ucfirst($pembayaran->status) }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Dibuat Oleh</td>
+                                        <td>: {{ $pembayaran->user->name }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="row mb-2">
-                    <div class="col-md-5">Tanggal Pembelian</div>
-                    <div class="col-md-7">: {{ $pembelian->tanggal_pembelian->format('d/m/Y') }}</div>
+            
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Detail Barang</h5>
                 </div>
-                @if($pembelian->tanggal_jatuh_tempo)
-                <div class="row mb-2">
-                    <div class="col-md-5">Jatuh Tempo</div>
-                    <div class="col-md-7">: {{ \Carbon\Carbon::parse($pembelian->tanggal_jatuh_tempo)->format('d/m/Y') }}</div>
-                </div>
-                <div class="row mb-2">
-                    <div class="col-md-5">Status</div>
-                    <div class="col-md-7">
-                        @if(($pembelian->sisa_pembayaran ?? $pembelian->total) <= 0)
-                            <span class="badge bg-success">Lunas</span>
-                        @elseif($pembelian->tanggal_jatuh_tempo && \Carbon\Carbon::parse($pembelian->tanggal_jatuh_tempo) < now())
-                            <span class="badge bg-danger">Telat {{ now()->diffInDays(\Carbon\Carbon::parse($pembelian->tanggal_jatuh_tempo)) }} hari</span>
-                        @else
-                            <span class="badge bg-warning">Belum Lunas</span>
-                        @endif
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th width="5%">No</th>
+                                    <th width="15%">Kode Obat</th>
+                                    <th width="30%">Nama Obat</th>
+                                    <th width="10%">Jumlah</th>
+                                    <th width="15%">Harga Satuan</th>
+                                    <th width="15%">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($pembayaran->penerimaanPembelian->pembelian->detailPembelian as $key => $item)
+                                <tr>
+                                    <td>{{ $key + 1 }}</td>
+                                    <td>{{ $item->obat->kode_obat }}</td>
+                                    <td>{{ $item->obat->nama_obat }}</td>
+                                    <td class="text-center">{{ $item->jumlah }} {{ $item->obat->satuan }}</td>
+                                    <td class="text-right">Rp {{ number_format($item->harga_satuan, 0, ',', '.') }}</td>
+                                    <td class="text-right">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                            <tfoot class="bg-light">
+                                <tr>
+                                    <th colspan="5" class="text-right">Total</th>
+                                    <th class="text-right">Rp {{ number_format($pembayaran->penerimaanPembelian->pembelian->total, 0, ',', '.') }}</th>
+                                </tr>
+                            </tfoot>
+                        </table>
                     </div>
                 </div>
-                @endif
+            </div>
+            
+            @if($pembayaran->penerimaanPembelian->pembelian->jenis_pembayaran == 'kredit')
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">Informasi Kredit</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <td width="50%">Total Pembelian</td>
+                                        <td>: Rp {{ number_format($pembayaran->penerimaanPembelian->pembelian->total, 0, ',', '.') }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Total Dibayar</td>
+                                        <td>: Rp {{ number_format($pembayaran->penerimaanPembelian->pembayaran->sum('jumlah_bayar'), 0, ',', '.') }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Sisa Hutang</td>
+                                        <td class="font-weight-bold text-{{ $pembayaran->sisa_hutang > 0 ? 'danger' : 'success' }}">
+                                            : Rp {{ number_format($pembayaran->sisa_hutang, 0, ',', '.') }}
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <td width="50%">Tanggal Pembelian</td>
+                                        <td>: {{ \Carbon\Carbon::parse($pembayaran->penerimaanPembelian->pembelian->tanggal_pembelian)->format('d/m/Y') }}</td>
+                                    </tr>
+                                    @if($pembayaran->penerimaanPembelian->pembelian->tanggal_jatuh_tempo)
+                                    <tr>
+                                        <td>Jatuh Tempo</td>
+                                        <td>: {{ \Carbon\Carbon::parse($pembayaran->penerimaanPembelian->pembelian->tanggal_jatuh_tempo)->format('d/m/Y') }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Status</td>
+                                        <td>
+                                            @if($pembayaran->sisa_hutang <= 0)
+                                                <span class="badge bg-success">Lunas</span>
+                                            @elseif($pembayaran->penerimaanPembelian->pembelian->tanggal_jatuh_tempo < now())
+                                                <span class="badge bg-danger">Telat {{ now()->diffInDays($pembayaran->penerimaanPembelian->pembelian->tanggal_jatuh_tempo) }} hari</span>
+                                            @else
+                                                <span class="badge bg-warning">Belum Lunas</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    @endif
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
+            
+            @if($pembayaran->penerimaanPembelian->pembayaran->count() > 1)
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Riwayat Pembayaran</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th width="5%">No</th>
+                                    <th width="15%">Tanggal Bayar</th>
+                                    <th width="20%">Jumlah</th>
+                                    <th width="20%">Sisa Hutang</th>
+                                    <th width="15%">Status</th>
+                                    <th width="25%">Keterangan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($pembayaran->penerimaanPembelian->pembayaran->sortBy('tanggal_bayar') as $index => $bayar)
+                                <tr class="{{ $bayar->id == $pembayaran->id ? 'bg-light' : '' }}">
+                                    <td>{{ $index + 1 }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($bayar->tanggal_bayar)->format('d/m/Y') }}</td>
+                                    <td>Rp {{ number_format($bayar->jumlah_bayar, 0, ',', '.') }}</td>
+                                    <td>Rp {{ number_format($bayar->sisa_hutang, 0, ',', '.') }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ $bayar->status == 'lunas' ? 'success' : 'warning' }}">
+                                            {{ ucfirst($bayar->status) }}
+                                        </span>
+                                    </td>
+                                    <td>{{ $bayar->catatan ?? '-' }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            @endif
+            
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{{ route('pembayaran-pembelian.index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Kembali ke Daftar
+                </a>
+                <div>
+                    <a href="{{ route('pembayaran-pembelian.edit', $pembayaran->id) }}" class="btn btn-warning">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <a href="{{ route('pembayaran-pembelian.create') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Pembayaran Baru
+                    </a>
+                </div>
             </div>
         </div>
-    </div>
-</div>
-@endif
-
-@if($pembelian->penerimaan && $pembelian->penerimaan->pembayaran->count() > 0)
-<div class="card shadow mb-4">
-    <div class="card-header py-3 bg-info text-white">
-        <h6 class="m-0 font-weight-bold">Riwayat Pembayaran</h6>
-    </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Tanggal Bayar</th>
-                        <th>Jumlah</th>
-                        <th>Sisa Hutang</th>
-                        <th>Status</th>
-                        <th>Keterangan</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($pembelian->penerimaan->pembayaran as $index => $bayar)
-                    <tr>
-                        <td>{{ $index + 1 }}</td>
-                        <td>{{ \Carbon\Carbon::parse($bayar->tanggal_bayar)->format('d/m/Y') }}</td>
-                        <td>Rp {{ number_format($bayar->jumlah_bayar, 0, ',', '.') }}</td>
-                        <td>Rp {{ number_format($bayar->sisa_hutang ?? 0, 0, ',', '.') }}</td>
-                        <td>
-                            <span class="badge bg-{{ $bayar->status == 'lunas' ? 'success' : 'warning' }}">
-                                {{ ucfirst($bayar->status) }}
-                            </span>
-                        </td>
-                        <td>{{ $bayar->catatan ?? '-' }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-@endif
-    
-    <div class="text-right">
-        <a href="{{ route('pembayaran-pembelian.edit', $pembayaran->id) }}" class="btn btn-primary">Edit</a>
-        <a href="{{ route('pembayaran-pembelian.index') }}" class="btn btn-secondary">Kembali</a>
     </div>
 </div>
 @endsection

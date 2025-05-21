@@ -28,7 +28,14 @@ class Pembelian extends Model
     {
         return $this->hasMany(DetailPembelian::class);
     }
-
+        public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+public function pembayaran()
+{
+    return $this->hasOne(PembayaranPembelian::class, 'pembelian_id');
+}
     public function penerimaan()
     {
         return $this->hasOne(PenerimaanPembelian::class);
