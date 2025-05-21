@@ -14,6 +14,8 @@ class Pembelian extends Model
         'total',
         'status',
         'jenis_pembayaran',
+        'sisa_pembayaran',
+        'tanggal_jatuh_tempo',
         'user_id'
     ];
 
@@ -43,4 +45,25 @@ class Pembelian extends Model
         public function users() {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function getRemainingPaymentAttribute()
+{
+    if ($this->penerimaan) {
+        $totalPaid = $this->penerimaan->pembayaran()->sum('jumlah_bayar') ?? 0;
+        return $this->total - $totalPaid;
+    }
+    return $this->total;
+}
+
+public function getIsPaidAttribute()
+{
+    return $this->remaining_payment <= 0;
+}
+public function getIsOverdueAttribute()
+{
+    if (!$this->tanggal_jatuh_tempo) {
+        return false;
+    }
+    return !$this->is_paid && Carbon::parse($this->tanggal_jatuh_tempo)->isPast();
+}
 }

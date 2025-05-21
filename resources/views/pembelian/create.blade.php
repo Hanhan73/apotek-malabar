@@ -54,6 +54,16 @@
                 </div>
             </div>
 
+                        <div class="col-md-3">
+                <label for="tanggal_jatuh_tempo" class="form-label">Tanggal Jatuh Tempo*</label>
+                <input type="date" class="form-control @error('tanggal_jatuh_tempo') is-invalid @enderror" 
+                    id="tanggal_jatuh_tempo" name="tanggal_jatuh_tempo" 
+                    value="{{ old('tanggal_jatuh_tempo') }}" required>
+                @error('tanggal_jatuh_tempo')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
             <div class="mb-4">
                 <label class="form-label">Daftar Obat*</label>
                 <div class="table-responsive">
@@ -169,13 +179,7 @@
                 </div>
             </div>
 
-            <div id="kredit-options" class="row mb-3" style="display: none;">
-                <div class="col-md-6">
-                    <label for="tanggal_jatuh_tempo" class="form-label">Tanggal Jatuh Tempo*</label>
-                    <input type="date" class="form-control" id="tanggal_jatuh_tempo" name="tanggal_jatuh_tempo" 
-                        value="{{ old('tanggal_jatuh_tempo') }}" required>
-                </div>
-            </div>
+
 
             <div class="d-flex justify-content-end">
                 <button type="submit" class="btn btn-primary">
@@ -409,6 +413,17 @@
     if (jenisPembayaranSelect.value === 'kredit') {
         kreditOptions.style.display = 'flex';
         document.getElementById('tanggal_jatuh_tempo').setAttribute('required', 'required');
+    }
+});
+
+document.getElementById('jenis_pembayaran').addEventListener('change', function() {
+    const jatuhTempoField = document.getElementById('tanggal_jatuh_tempo').closest('.col-md-3');
+    if (this.value === 'kredit') {
+        jatuhTempoField.style.display = 'block';
+        document.getElementById('tanggal_jatuh_tempo').required = true;
+    } else {
+        jatuhTempoField.style.display = 'none';
+        document.getElementById('tanggal_jatuh_tempo').required = false;
     }
 });
 </script>

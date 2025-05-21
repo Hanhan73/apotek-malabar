@@ -52,7 +52,7 @@ class PembelianController extends Controller
                 $sortDirection = $request->has('direction') ? $request->direction : 'desc';
                 $query->orderBy($request->sort, $sortDirection);
             } else {
-                $query->orderBy('tanggal', 'desc');
+                $query->orderBy('tanggal_pembelian', 'desc');
             }
             
             $pembelian = $query->paginate(10)->withQueryString();
@@ -137,6 +137,7 @@ class PembelianController extends Controller
             'items.*.jumlah' => 'required|integer|min:1',
             'items.*.harga' => 'required|integer', 
             'jenis_pembayaran' => 'required|in:tunai,kredit',
+            'tanggal_jatuh_tempo' => 'required_if:jenis_pembayaran,kredit|nullable|date|after:tanggal_pembelian',
             'keterangan' => 'nullable|string'
         ]);
         
@@ -151,7 +152,9 @@ class PembelianController extends Controller
             'tanggal_pembelian' => $request->tanggal_pembelian,
             'supplier_id' => $request->supplier_id,
             'total' => $totalHarga,
+            'sisa_pembayaran' => $totalHarga,
             'jenis_pembayaran' => $request->jenis_pembayaran,
+            'tanggal_jatuh_tempo' => $request->jenis_pembayaran === 'kredit' ? $request->tanggal_jatuh_tempo : null,
             'status' => 'dipesan',
             'user_id' => Auth::id(),
             'keterangan' => $request->keterangan ?? null

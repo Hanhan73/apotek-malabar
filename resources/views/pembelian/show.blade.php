@@ -133,7 +133,7 @@
                             <div class="col-md-6">
                                 <div class="row mb-2">
                                     <div class="col-md-5">Tanggal Pembelian</div>
-                                    <div class="col-md-7">: {{ $pembelian->tanggal_pembelian->format('d/m/Y') }}</div>
+                                    <div class="col-md-7">: {{ \Carbon\Carbon::parse($pembelian->tanggal_pembelian)->format('d/m/Y') }}</div>
                                 </div>
                                 @if($pembelian->tanggal_jatuh_tempo)
                                 <div class="row mb-2">

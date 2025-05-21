@@ -16,12 +16,12 @@
         @foreach($penerimaans as $penerimaan)
             <option value="{{ $penerimaan->id }}" 
                 data-total="{{ $penerimaan->pembelian->total }}"
-                data-terbayar="{{ $penerimaan->pembayaran->sum('jumlah_bayar') ?? 0 }}"
-                data-sisa="{{ $penerimaan->pembelian->total - ($penerimaan->pembayaran->sum('jumlah_bayar') ?? 0) }}"
+                data-terbayar="{{ $penerimaan->pembayaran ? $penerimaan->pembayaran->sum('jumlah_bayar') : 0 }}"
+                data-sisa="{{ $penerimaan->pembelian->total - ($penerimaan->pembayaran ? $penerimaan->pembayaran->sum('jumlah_bayar') : 0) }}"
                 data-supplier="{{ $penerimaan->pembelian->supplier->nama_supplier }}">
                 {{ $penerimaan->pembelian->kode_pembelian }} - 
                 {{ $penerimaan->pembelian->supplier->nama_supplier }} - 
-                Sisa: Rp {{ number_format($penerimaan->pembelian->total - ($penerimaan->pembayaran->sum('jumlah_bayar') ?? 0), 0, ',', '.') }}
+                Sisa: Rp {{ number_format($penerimaan->pembelian->total - ($penerimaan->pembayaran ? $penerimaan->pembayaran->sum('jumlah_bayar') : 0), 0, ',', '.') }}
             </option>
         @endforeach
     </select>
@@ -46,6 +46,11 @@
     <label for="catatan">Catatan</label>
     <textarea name="catatan" id="catatan" class="form-control" rows="3">{{ old('catatan') }}</textarea>
 </div>
+
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                    <a href="{{ route('pembayaran-pembelian.index') }}" class="btn btn-secondary">Batal</a>
+                </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

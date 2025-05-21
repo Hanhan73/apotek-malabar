@@ -21,7 +21,7 @@ return new class extends Migration
             $table->enum('jenis_pembayaran', ['tunai', 'kredit']);
             $table->decimal('total', 10, 2);
             $table->date('tanggal_jatuh_tempo');
-            $table->decimal('sisa_pembayaran', 12, 2);
+            $table->decimal('sisa_pembayaran', 12, 2)->default(0);
             $table->foreignId('user_id')->constrained('users');
             $table->timestamps();
         });
