@@ -20,11 +20,16 @@
             @endif
 
             <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
+                <label for="username" class="form-label">Username</label>
                 <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                    <input id="email" type="email" class="form-control @error('email') is-invalid @enderror"
-                           name="email" value="{{ old('email') }}" required autofocus>
+                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                    <input id="username" type="text" class="form-control @error('username') is-invalid @enderror"
+                           name="username" value="{{ old('username') }}" required autofocus>
+                    @error('username')
+                        <span class="invalid-feedback" role="alert">
+                            <strong>{{ $message }}</strong>
+                        </span>
+                    @enderror
                 </div>
             </div>
 
@@ -34,6 +39,11 @@
                     <span class="input-group-text"><i class="bi bi-lock"></i></span>
                     <input id="password" type="password" class="form-control @error('password') is-invalid @enderror"
                            name="password" required>
+                    @error('password')
+                        <span class="invalid-feedback" role="alert">
+                            <strong>{{ $message }}</strong>
+                        </span>
+                    @enderror
                 </div>
             </div>
 

@@ -113,11 +113,9 @@ public function create()
 
     public function show($id)
     {
-        $pembayaran = PembayaranPembelian::with([
-            'penerimaanPembelian.pembelian.supplier',
-            'penerimaanPembelian.pembelian.detailPembelian.obat',
-            'user'
-        ])->findOrFail($id);
+$pembayaran = PembayaranPembelian::with(['penerimaanPembelian.pembayaran' => function($query) {
+    $query->orderBy('tanggal_bayar');
+}])->find($id);
 
         return view('pembayaran_pembelian.show', compact('pembayaran'));
     }

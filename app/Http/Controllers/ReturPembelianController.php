@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PenerimaanPembelian;
 use App\Models\ReturPembelian;
 use App\Models\ReturPembelianDetail;
+use App\Models\PenerimaanPembelianDetail;
 use App\Models\Obat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -129,15 +130,21 @@ public function store(Request $request)
         return view('retur_pembelian.show', compact('retur'));
     }
 
-    public function edit($id)
-    {
-        $retur = ReturPembelian::with([
-            'penerimaanPembelian.items.obat',
-            'items'
-        ])->findOrFail($id);
+public function edit($id)
+{
+    // Ambil data retur beserta relasi penerimaan, item retur, dan obatnya
+    $retur = ReturPembelian::with([
+        'penerimaanPembelian.pembelian.detailPembelian.obat',
+        'penerimaanPembelian.items.obat',
+        'items.obat'
+    ])->findOrFail($id);
 
-        return view('retur_pembelian.edit', compact('retur'));
-    }
+    // Ambil data penerimaan dari relasi retur
+    $penerimaan = $retur->penerimaanPembelian;
+
+    // Kirim dua variabel ke view
+    return view('retur_pembelian.edit', compact('retur', 'penerimaan'));
+}
 
     public function update(Request $request, $id)
     {
@@ -147,7 +154,7 @@ public function store(Request $request)
             $request->validate([
                 'tanggal_retur' => 'required|date',
                 'items' => 'required|array',
-                'items.*.id' => 'required|exists:retur_pembelian_items,id',
+                'items.*.id' => 'required|exists:retur_pembelian_detail,id',
                 'items.*.jumlah' => 'required|integer|min:1',
                 'alasan_retur' => 'required|string',
             ]);
@@ -165,8 +172,8 @@ public function store(Request $request)
             
             // Update detail retur
             foreach ($request->items as $item) {
-                $returItem = ReturPembelianItem::find($item['id']);
-                $penerimaanItem = PenerimaanPembelianItem::where('penerimaan_pembelian_id', $retur->penerimaan_pembelian_id)
+                $returItem = ReturPembelianDetail::find($item['id']);
+                $penerimaanItem = PenerimaanPembelianDetail::where('penerimaan_pembelian_id', $retur->penerimaan_pembelian_id)
                     ->where('obat_id', $returItem->obat_id)
                     ->firstOrFail();
 

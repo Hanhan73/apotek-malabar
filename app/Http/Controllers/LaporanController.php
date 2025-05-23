@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Log;
+
 
 class LaporanController extends Controller
 {
@@ -29,12 +31,22 @@ class LaporanController extends Controller
      * Laporan Pembelian Tunai
      */
       public function pembelianTunai(Request $request)
+    {
+        $request->validate([
+            'bulan' => 'nullable|date_format:Y-m', // Format: YYYY-MM
+        ]);
 {
     $request->validate([
         'bulan' => 'nullable|date_format:Y-m', // Format: YYYY-MM
         'supplier_id' => 'nullable|exists:suppliers,id',
     ]);
 
+        // Default bulan berjalan jika tidak diisi
+        $bulan = $request->bulan ?? Carbon::now()->format('Y-m');
+        
+        // Parse bulan dan tentukan tanggal awal-akhir bulan
+        $tanggalMulai = Carbon::parse($bulan)->startOfMonth();
+        $tanggalAkhir = Carbon::parse($bulan)->endOfMonth();
     // Default bulan berjalan jika tidak diisi
     $bulan = $request->bulan ?? Carbon::now()->format('Y-m');
     $supplierId = $request->supplier_id;
@@ -43,15 +55,38 @@ class LaporanController extends Controller
     $tanggalMulai = Carbon::parse($bulan)->startOfMonth();
     $tanggalAkhir = Carbon::parse($bulan)->endOfMonth();
 
+        $pembelianTunai = Pembelian::with(['supplier', 'detailPembelian.obat', 'users'])
+            ->where('jenis_pembayaran', 'tunai')
+            ->whereBetween('tanggal_pembelian', [$tanggalMulai, $tanggalAkhir])
+            ->orderBy('tanggal_pembelian')
+            ->get();
     $query = Pembelian::with(['supplier', 'detailPembelian.obat', 'user'])
         ->where('jenis_pembayaran', 'tunai')
         ->whereBetween('tanggal_pembelian', [$tanggalMulai, $tanggalAkhir]);
 
+        $totalPembelian = $pembelianTunai->sum('total');
+        
+        if ($request->has('export') && $request->export == 'pdf') {
+            return Pdf::loadView('laporan.pembelian_tunai_pdf', [
+                'pembelianTunai' => $pembelianTunai,
+                'totalPembelian' => $totalPembelian,
+                'bulan' => $bulan, // Kirim bulan ke view
+                'tanggalMulai' => $tanggalMulai,
+                'tanggalAkhir' => $tanggalAkhir
+            ])->download('laporan_pembelian_tunai_'.$bulan.'.pdf');
+        }
     // Filter berdasarkan supplier jika dipilih
     if ($supplierId) {
         $query->where('supplier_id', $supplierId);
     }
 
+        return view('laporan.pembelian_tunai', compact(
+            'pembelianTunai', 
+            'totalPembelian',
+            'bulan',
+            'tanggalMulai',
+            'tanggalAkhir'
+        ));
     $pembelianTunai = $query->orderBy('tanggal_pembelian')->get();
     $suppliers = Supplier::orderBy('nama_supplier')->get();
 
@@ -81,72 +116,87 @@ class LaporanController extends Controller
         'tanggalMulai',
         'tanggalAkhir'
     ));
+    }
 }
-
-    /**
-     * Laporan Pembelian Kredit
-     */
-    public function pembelianKredit(Request $request)
+public function pembelianKredit(Request $request)
 {
     $request->validate([
-        'bulan' => 'nullable|date_format:Y-m', // Format: YYYY-MM
+        'bulan' => 'nullable|date_format:Y-m',
         'status' => 'nullable|in:semua,lunas,belum_lunas',
     ]);
 
-    // Default bulan berjalan jika tidak diisi
-    $bulan = $request->bulan ?? Carbon::now()->format('Y-m');
+    $bulan = $request->bulan ?? now()->format('Y-m');
     $status = $request->status ?? 'semua';
     
-    // Parse bulan dan tentukan tanggal awal-akhir bulan
     $tanggalMulai = Carbon::parse($bulan)->startOfMonth();
     $tanggalAkhir = Carbon::parse($bulan)->endOfMonth();
 
-    $query = Pembelian::with(['supplier', 'detailPembelian.obat', 'users', 'pembayaran', 'penerimaan'])
+    $query = Pembelian::with(['supplier', 'detailPembelian'])
         ->where('jenis_pembayaran', 'kredit')
         ->whereBetween('tanggal_pembelian', [$tanggalMulai, $tanggalAkhir]);
 
-    // Filter berdasarkan status
-    if ($status === 'lunas') {
-        $query->where('status_pembayaran', 'lunas');
-    } elseif ($status === 'belum_lunas') {
-        $query->where('status_pembayaran', '!=', 'lunas');
+$pembelianKredit = $query->get()
+    ->map(function ($item) {
+        $item->sisa_hutang = $item->sisa_pembayaran;
+        $item->status_pembayaran = $item->sisa_pembayaran <= 0 ? 'lunas' : 'belum_lunas';
+
+        Log::debug('Calculated values:', [
+            'total' => $item->total,
+            'sisa' => $item->sisa_pembayaran,
+            'total_dibayar' => $item->total_dibayar, // ✅ sekarang pasti 200000
+            'status_pembayaran' => $item->status_pembayaran,
+        ]);
+
+        return $item;
+    });
+    // Log filtering activity
+    Log::info('Filtering pembelian kredit by status: '.$status);
+
+    if ($status !== 'semua') {
+        $pembelianKredit = $pembelianKredit->filter(function($item) use ($status) {
+            $matches = $status === 'lunas' 
+                ? $item->status_pembayaran === 'lunas'
+                : $item->status_pembayaran !== 'lunas';
+            
+            if (!$matches) {
+                Log::debug('Excluding pembelian:', [
+                    'id' => $item->id,
+                    'kode' => $item->kode_pembelian,
+                    'status' => $item->status_pembayaran
+                ]);
+            }
+            
+            return $matches;
+        });
     }
 
-    $pembelianKredit = $query->orderBy('tanggal_pembelian')->get();
+    // Log totals calculation
+    Log::info('Calculating totals', [
+        'total_pembelian' => $pembelianKredit->sum('total'),
+        'total_dibayar' => $pembelianKredit->sum('total_dibayar'),
+        'total_sisa_hutang' => $pembelianKredit->sum('sisa_pembayaran'),
+        'count' => $pembelianKredit->count()
+    ]);
 
-    // Hitung total-total
-    $totalPembelian = $pembelianKredit->sum('total');
-    $totalLunas = $pembelianKredit->where('status_pembayaran', 'lunas')->sum('total');
-    $totalBelumLunas = $pembelianKredit->where('status_pembayaran', '!=', 'lunas')->sum('total');
-    
-    // Export PDF
+    // Calculate totals
+    $totalPembelian = $pembelianKredit->sum('total');             // Semua tagihan
+    $totalDibayar = $pembelianKredit->sum('total_dibayar');       // Sudah dibayar
+    $totalSisaHutang = $pembelianKredit->sum('sisa_hutang'); 
+
     if ($request->has('export') && $request->export == 'pdf') {
-        return Pdf::loadView('laporan.pembelian_kredit_pdf', [
-            'pembelianKredit' => $pembelianKredit,
-            'totalPembelian' => $totalPembelian,
-            'totalLunas' => $totalLunas,
-            'totalBelumLunas' => $totalBelumLunas,
-            'bulan' => $bulan,
-            'status' => $status,
-            'tanggalMulai' => $tanggalMulai,
-            'tanggalAkhir' => $tanggalAkhir
-        ])
+        return Pdf::loadView('laporan.pembelian_kredit_pdf', compact(
+            'pembelianKredit', 'totalPembelian', 'totalDibayar', 'totalSisaHutang',
+            'bulan', 'status', 'tanggalMulai', 'tanggalAkhir'
+        ))
         ->setPaper('a4', 'landscape')
         ->download('laporan_pembelian_kredit_'.$bulan.'.pdf');
     }
 
     return view('laporan.pembelian_kredit', compact(
-        'pembelianKredit',
-        'totalPembelian',
-        'totalLunas',
-        'totalBelumLunas',
-        'bulan',
-        'status',
-        'tanggalMulai',
-        'tanggalAkhir'
+        'pembelianKredit', 'totalPembelian', 'totalDibayar', 'totalSisaHutang',
+        'bulan', 'status', 'tanggalMulai', 'tanggalAkhir'
     ));
 }
-
     /**
      * Laporan Retur Pembelian
      */

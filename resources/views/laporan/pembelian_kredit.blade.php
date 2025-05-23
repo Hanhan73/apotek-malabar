@@ -78,8 +78,8 @@
                                             <span class="badge bg-warning">Belum Lunas</span>
                                         @endif
                                     </td>
-                                    <td>Rp {{ number_format($pembelian->pembayaran->sum('jumlah')), 0, ',', '.' }}</td>
-                                    <td>Rp {{ number_format($pembelian->total - $pembelian->pembayaran->sum('jumlah')), 0, ',', '.' }}</td>
+                                    <td>Rp {{ number_format($pembelian->total_dibayar, 0, ',', '.') }}</td>
+                                    <td>Rp {{ number_format($pembelian->sisa_hutang, 0, ',', '.') }}</td>
                                     <td>
                                         <a href="#" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#detailModal{{ $pembelian->id }}">
                                             <i class="bi bi-eye"></i> Detail
@@ -92,15 +92,23 @@
                                 </tr>
                                 @endforelse
                             </tbody>
-                            <tfoot>
-                                <tr>
-                                    <td colspan="5" class="text-end fw-bold">Total:</td>
-                                    <td class="fw-bold">Rp {{ number_format($totalPembelian, 0, ',', '.') }}</td>
-                                    <td colspan="2" class="text-end fw-bold">Total Lunas:</td>
-                                    <td class="fw-bold">Rp {{ number_format($totalLunas, 0, ',', '.') }}</td>
-                                    <td class="fw-bold">Rp {{ number_format($totalBelumLunas, 0, ',', '.') }}</td>
-                                </tr>
-                            </tfoot>
+                           <tfoot>
+                            <tr>
+                                <td colspan="5" class="text-end fw-bold">Total:</td>
+                                <td class="fw-bold">Rp {{ number_format($totalPembelian, 0, ',', '.') }}</td>
+                                <td colspan="2" class="text-end fw-bold">Total Dibayar:</td>
+                                <td class="fw-bold">Rp {{ number_format($pembelianKredit->sum('total_dibayar'), 0, ',', '.') }}</td>
+                                <td class="fw-bold">Rp {{ number_format($pembelianKredit->sum('sisa_hutang'), 0, ',', '.') }}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="7" class="text-end fw-bold">Total Lunas:</td>
+                                <td colspan="3" class="fw-bold">{{ $pembelianKredit->where('status_pembayaran', 'lunas')->count() }} Transaksi</td>
+                            </tr>
+                            <tr>
+                                <td colspan="7" class="text-end fw-bold">Total Belum Lunas:</td>
+                                <td colspan="3" class="fw-bold">{{ $pembelianKredit->where('status_pembayaran', '!=', 'lunas')->count() }} Transaksi</td>
+                            </tr>
+                        </tfoot>
                         </table>
                     </div>
                 </div>
@@ -109,7 +117,6 @@
     </div>
 </div>
 
-<!-- Modal Detail -->
 @foreach ($pembelianKredit as $pembelian)
 <div class="modal fade" id="detailModal{{ $pembelian->id }}" tabindex="-1" aria-labelledby="detailModalLabel{{ $pembelian->id }}" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -119,10 +126,109 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <!-- Isi modal detail -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p><strong>Supplier:</strong> {{ $pembelian->supplier->nama_supplier }}</p>
+                        <p><strong>Tanggal:</strong> {{ \Carbon\Carbon::parse($pembelian->tanggal_pembelian)->format('d/m/Y') }}</p>
+                        <p><strong>Status:</strong> 
+                            @if($pembelian->status_pembayaran == 'lunas')
+                                <span class="badge bg-success">Lunas</span>
+                            @else
+                                <span class="badge bg-warning">Belum Lunas</span>
+                            @endif
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Kode Pembelian:</strong> {{ $pembelian->kode_pembelian }}</p>
+                        <p><strong>Total Harga:</strong> Rp {{ number_format($pembelian->total, 0, ',', '.') }}</p>
+                        <p><strong>Dibuat Oleh:</strong> {{ $pembelian->users->name }}</p>
+                    </div>
+                </div>
+
+                <h6 class="fw-bold mb-3">Daftar Obat</h6>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Kode Obat</th>
+                                <th>Nama Obat</th>
+                                <th>Jumlah</th>
+                                <th>Harga Satuan</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($pembelian->detailPembelian as $index => $detail)
+                            <tr>
+                                <td>{{ $index + 1 }}</td>
+                                <td>{{ $detail->obat->kode_obat }}</td>
+                                <td>{{ $detail->obat->nama_obat }}</td>
+                                <td>{{ $detail->jumlah }}</td>
+                                <td>Rp {{ number_format($detail->harga_satuan, 0, ',', '.') }}</td>
+                                <td>Rp {{ number_format($detail->subtotal, 0, ',', '.') }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="5" class="text-end fw-bold">Total:</td>
+                                <td class="fw-bold">Rp {{ number_format($pembelian->total, 0, ',', '.') }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <!-- Riwayat Pembayaran -->
+                @if($pembelian->pembayaran->count() > 0)
+                <div class="mt-4">
+                    <h6 class="fw-bold mb-3">Riwayat Pembayaran</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th width="5%">No.</th>
+                                    <th width="20%">Tanggal Bayar</th>
+                                    <th width="20%">Jumlah Bayar</th>
+                                    <th width="15%">Metode</th>
+                                    <th width="10%">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($pembelian->pembayaran->sortBy('tanggal_bayar') as $index => $bayar)
+                                <tr>
+                                    <td>{{ $index + 1 }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($bayar->tanggal_bayar)->format('d/m/Y') }}</td>
+                                    <td class="text-end">Rp {{ number_format($bayar->jumlah_bayar, 0, ',', '.') }}</td>
+                                    <td>{{ $bayar->metode_pembayaran }}</td>
+                                    <td class="text-center">
+                                        @if($bayar->status == 'lunas')
+                                            <span class="badge bg-success">Lunas</span>
+                                        @else
+                                            <span class="badge bg-warning">Belum Lunas</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="2" class="text-end fw-bold">Total Dibayar:</td>
+                                    <td colspan="3" class="text-end fw-bold">Rp {{ number_format($pembelian->pembayaran->sum('jumlah_bayar'), 0, ',', '.') }}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+                @endif
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
             </div>
         </div>
     </div>
 </div>
 @endforeach
+
+
 @endsection

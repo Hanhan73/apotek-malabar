@@ -115,7 +115,6 @@ public function store(Request $request)
                 'obat_id' => $obatId,
                 'jumlah_diterima' => $jumlahDiterima,
                 'harga_satuan' => $hargaSatuan,
-                'subtotal' => $jumlahDiterima * $hargaSatuan,
             ]);
             
             // Update stok obat
@@ -173,7 +172,7 @@ public function store(Request $request)
             $request->validate([
                 'tanggal_penerimaan' => 'required|date',
                 'items' => 'required|array',
-                'items.*.id' => 'required|exists:penerimaan_pembelian_items,id',
+                'items.*.id' => 'required|exists:penerimaan_pembelian_detail,id',
                 'items.*.jumlah_diterima' => 'required|integer|min:1',
                 'catatan' => 'nullable|string',
             ]);
@@ -188,8 +187,7 @@ public function store(Request $request)
 
             // Update detail penerimaan
             foreach ($request->items as $item) {
-                $penerimaanItem = PenerimaanPembelianItem::find($item['id']);
-
+                $penerimaanItem = PenerimaanPembelianDetail::find($item['id']);
                 // Hitung selisih jumlah
                 $selisih = $item['jumlah_diterima'] - $penerimaanItem->jumlah_diterima;
 

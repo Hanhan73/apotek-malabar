@@ -18,6 +18,13 @@ class Pembelian extends Model
         'tanggal_jatuh_tempo',
         'user_id'
     ];
+    protected $appends = ['total_dibayar'];
+
+
+    protected $casts = [
+    'total' => 'float',
+    'sisa_pembayaran' => 'float',
+];
 
     public function supplier()
     {
@@ -34,7 +41,23 @@ class Pembelian extends Model
     }
 public function pembayaran()
 {
-    return $this->hasOne(PembayaranPembelian::class, 'pembelian_id');
+    return $this->hasMany(PembayaranPembelian::class);
+}
+
+// Helper methods for payment status
+public function getTotalDibayarAttribute()
+{
+    return (float) $this->total - (float) $this->sisa_pembayaran;
+}
+
+public function getSisaHutangAttribute()
+{
+    return $this->total - $this->total_dibayar;
+}
+
+public function getStatusPembayaranAttribute()
+{
+    return $this->sisa_hutang <= 0 ? 'lunas' : 'belum_lunas';
 }
     public function penerimaan()
     {

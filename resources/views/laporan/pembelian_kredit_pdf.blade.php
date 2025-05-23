@@ -10,12 +10,14 @@
         th { background-color: #f2f2f2; text-align: center; }
         .text-center { text-align: center; }
         .text-right { text-align: right; }
+        .text-end { text-align: right; }
         .header { text-align: center; margin-bottom: 15px; }
         .header h2 { margin-bottom: 5px; }
         .footer { margin-top: 15px; font-size: 10px; text-align: center; }
-        .badge { padding: 3px 6px; border-radius: 3px; font-weight: normal; }
+        .badge { padding: 3px 6px; border-radius: 3px; font-weight: normal; display: inline-block; }
         .badge-success { background-color: #28a745; color: white; }
         .badge-warning { background-color: #ffc107; color: black; }
+        .fw-bold { font-weight: bold; }
     </style>
 </head>
 <body>
@@ -58,8 +60,8 @@
                         <span class="badge badge-warning">Belum Lunas</span>
                     @endif
                 </td>
-                <td class="text-right">Rp {{ number_format($pembelian->pembayaran->sum('jumlah')), 0, ',', '.' }}</td>
-                <td class="text-right">Rp {{ number_format($pembelian->total - $pembelian->pembayaran->sum('jumlah')), 0, ',', '.' }}</td>
+                <td class="text-right">Rp {{ number_format($pembelian->total_dibayar, 0, ',', '.') }}</td>
+                <td class="text-right">Rp {{ number_format($pembelian->sisa_hutang, 0, ',', '.') }}</td>
             </tr>
             @empty
             <tr>
@@ -69,11 +71,19 @@
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="5" class="text-right fw-bold">Total:</td>
+                <td colspan="5" class="text-end fw-bold">Total:</td>
                 <td class="text-right fw-bold">Rp {{ number_format($totalPembelian, 0, ',', '.') }}</td>
-                <td colspan="2" class="text-right fw-bold">Total Lunas:</td>
-                <td class="text-right fw-bold">Rp {{ number_format($totalLunas, 0, ',', '.') }}</td>
-                <td class="text-right fw-bold">Rp {{ number_format($totalBelumLunas, 0, ',', '.') }}</td>
+                <td colspan="2" class="text-end fw-bold">Total Dibayar:</td>
+                <td class="text-right fw-bold">Rp {{ number_format($pembelianKredit->sum('total_dibayar'), 0, ',', '.') }}</td>
+                <td class="text-right fw-bold">Rp {{ number_format($pembelianKredit->sum('sisa_hutang'), 0, ',', '.') }}</td>
+            </tr>
+            <tr>
+                <td colspan="7" class="text-end fw-bold">Total Lunas:</td>
+                <td colspan="2" class="fw-bold">{{ $pembelianKredit->where('status_pembayaran', 'lunas')->count() }} Transaksi</td>
+            </tr>
+            <tr>
+                <td colspan="7" class="text-end fw-bold">Total Belum Lunas:</td>
+                <td colspan="2" class="fw-bold">{{ $pembelianKredit->where('status_pembayaran', '!=', 'lunas')->count() }} Transaksi</td>
             </tr>
         </tfoot>
     </table>

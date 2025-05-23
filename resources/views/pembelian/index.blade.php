@@ -36,7 +36,7 @@
                         <td>{{ $loop->iteration }}</td>
                         <td>{{ $item->kode_pembelian }}</td>
                         <td>{{ $item->supplier->nama_supplier }}</td>
-                        <td>{{ \Carbon\Carbon::parse ($item->tanggal_pembelian)->format('d/m/Y') }}</td>
+                        <td>{{ \Carbon\Carbon::parse($item->tanggal_pembelian)->format('d/m/Y') }}</td>
                         <td>Rp {{ number_format($item->total, 0, ',', '.') }}</td>
                         <td>
                             @switch($item->status)
@@ -48,17 +48,22 @@
                             @endswitch
                         </td>
                         <td>
-                            <a href="{{ route('pembelian.show', $item->id) }}" class="btn btn-sm btn-info">
-                                <i class="bi bi-eye"></i>
+                            <a href="{{ route('pembelian.show', $item->id) }}" class="btn btn-sm btn-info" title="Detail">
+                                <i class="fas fa-eye"></i>
                             </a>
-                                <a href="{{ route('pembelian.edit', $item->id) }}" class="btn btn-sm btn-warning">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
+                            <a href="{{ route('pembelian.edit', $item->id) }}" class="btn btn-sm btn-warning" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
                         </td>
                     </tr>
                     @endforeach
                 </tbody>
             </table>
+        </div>
+        
+        <!-- Pagination Links -->
+        <div class="mt-3">
+            {{ $pembelian->links() }}
         </div>
     </div>
 </div>

@@ -8,7 +8,8 @@ class PembayaranPembelian extends Model
 {
     protected $table = 'pembayaran_pembelian';
 
- protected $fillable = [
+    protected $fillable = [
+        'pembelian_id', // Add this
         'penerimaan_pembelian_id',
         'tanggal_bayar',
         'jumlah_bayar',
@@ -25,24 +26,20 @@ class PembayaranPembelian extends Model
         'sisa_hutang' => 'integer'
     ];
 
+    // Direct relationship to Pembelian
+    public function pembelian()
+    {
+        return $this->belongsTo(Pembelian::class);
+    }
+
+    // Relationship to PenerimaanPembelian
     public function penerimaanPembelian()
     {
         return $this->belongsTo(PenerimaanPembelian::class);
     }
+
     public function user()
     {
         return $this->belongsTo(User::class);
     }
-public function pembayaran()
-{
-    return $this->hasOneThrough(
-        \App\Models\PembayaranPembelian::class,
-        \App\Models\PenerimaanPembelian::class,
-        'pembelian_id', // FK di penerimaan_pembelian yang menunjuk ke pembelian
-        'penerimaan_pembelian_id', // FK di pembayaran_pembelian yang menunjuk ke penerimaan_pembelian
-        'id', // PK pembelian
-        'id'  // PK penerimaan_pembelian
-    );
 }
-}
-

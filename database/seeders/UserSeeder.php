@@ -17,24 +17,28 @@ class UserSeeder extends Seeder
         $users = [
             [
                 'name' => 'Admin Utama',
+                'username' => 'admin',  
                 'email' => 'admin@apotek.com',
-                'password' => Hash::make('password'), // Ganti password ini di produksi
+                'password' => Hash::make('password'),
                 'role' => 'admin',
             ],
             [
                 'name' => 'Apoteker A',
+                'username' => 'apoteker',
                 'email' => 'apoteker@apotek.com',
                 'password' => Hash::make('password'),
                 'role' => 'apoteker',
             ],
             [
                 'name' => 'Asisten Apoteker B',
+                'username' => 'asisten',
                 'email' => 'asisten@apotek.com',
                 'password' => Hash::make('password'),
                 'role' => 'asisten_apoteker',
             ],
             [
                 'name' => 'Pemilik Apotek',
+                'username' => 'pemilik',
                 'email' => 'pemilik@apotek.com',
                 'password' => Hash::make('password'),
                 'role' => 'pemilik',

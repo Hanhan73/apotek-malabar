@@ -42,7 +42,10 @@ class PenerimaanPembelian extends Model
     {
         return $this->pembelian->total_harga;
     }
-
+public function penerimaanPembelian()
+{
+    return $this->belongsTo(PenerimaanPembelian::class);
+}
     public function items()
     {
         return $this->hasMany(PenerimaanPembelianDetail::class);
@@ -52,10 +55,10 @@ class PenerimaanPembelian extends Model
         return $this->hasMany(PenerimaanPembelianDetail::class);
     }
 
-    public function pembayaran()
-    {
-        return $this->hasOne(PembayaranPembelian::class);
-    }
+public function pembayaran()
+{
+    return $this->hasMany(PembayaranPembelian::class);
+}
 
     public function retur()
     {

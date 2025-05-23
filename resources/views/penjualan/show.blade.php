@@ -12,13 +12,6 @@
                             <a href="{{ route('penjualan.edit', $penjualan->id) }}" class="btn btn-warning">
                                 <i class="bi bi-pencil"></i> Edit
                             </a>
-                            <form action="{{ route('penjualan.destroy', $penjualan->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus transaksi ini?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger">
-                                    <i class="bi bi-trash"></i> Hapus
-                                </button>
-                            </form>
                         @endif
                         <a href="{{ route('penjualan.index') }}" class="btn btn-secondary">
                             <i class="bi bi-arrow-left"></i> Kembali

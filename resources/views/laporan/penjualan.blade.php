@@ -46,32 +46,6 @@
                         @endif
                     </div>
 
-                    <div class="row mb-4">
-                        <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h5 class="card-title">Total Penjualan</h5>
-                                    <p class="card-text">Rp {{ number_format($totalPenjualan, 0, ',', '.') }}</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h5 class="card-title">Dengan Resep</h5>
-                                    <p class="card-text">Rp {{ number_format($totalDenganResep, 0, ',', '.') }}</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h5 class="card-title">Tanpa Resep</h5>
-                                    <p class="card-text">Rp {{ number_format($totalTanpaResep, 0, ',', '.') }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
                     <div class="table-responsive">
                         <table class="table table-bordered table-striped">

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pembelian;
+use App\Models\Pembayaran;
 use App\Models\DetailPembelian;
 use App\Models\Supplier;
 use App\Models\Obat;

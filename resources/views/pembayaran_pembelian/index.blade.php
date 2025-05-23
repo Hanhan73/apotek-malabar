@@ -64,23 +64,12 @@
                                 </span>
                             </td>
                             <td>
-                                <a href="{{ route('pembayaran-pembelian.show', $pembayaran->id) }}" 
-                                   class="btn btn-sm btn-info" title="Detail">
+                                <a href="{{ route('pembayaran-pembelian.show', $pembayaran->id) }}" class="btn btn-sm btn-info" title="Detail">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                <a href="{{ route('pembayaran-pembelian.edit', $pembayaran->id) }}" 
-                                   class="btn btn-sm btn-warning" title="Edit">
+                                <a href="{{ route('pembayaran-pembelian.edit', $pembayaran->id) }}" class="btn btn-sm btn-warning" title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <form action="{{ route('pembayaran-pembelian.destroy', $pembayaran->id) }}" 
-                                      method="POST" style="display: inline-block;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger" 
-                                            title="Hapus" onclick="return confirm('Apakah Anda yakin?')">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
                             </td>
                         </tr>
                         @empty

@@ -14,6 +14,7 @@ class ObatSeeder extends Seeder
     {
         $data = [
             [
+                'kode_obat' => 'B001',
                 'jenis_obat' => 'bebas',
                 'nama_obat' => 'Paracetamol 500mg',
                 'harga_jual' => 2500,
@@ -22,6 +23,7 @@ class ObatSeeder extends Seeder
                 'kadaluarsa' => Carbon::now()->addYear(),
             ],
             [
+                'kode_obat' => 'H001',
                 'jenis_obat' => 'herbal',
                 'nama_obat' => 'Temulawak Herbal',
                 'harga_jual' => 5000,
@@ -30,6 +32,7 @@ class ObatSeeder extends Seeder
                 'kadaluarsa' => Carbon::now()->addMonths(9),
             ],
             [
+                'kode_obat' => 'P001',
                 'jenis_obat' => 'psikotropik',
                 'nama_obat' => 'Diazepam 2mg',
                 'harga_jual' => 7500,
@@ -38,6 +41,7 @@ class ObatSeeder extends Seeder
                 'kadaluarsa' => Carbon::now()->addMonths(6),
             ],
             [
+                'kode_obat' => 'S001',
                 'jenis_obat' => 'suplemen',
                 'nama_obat' => 'Vitamin C 1000mg',
                 'harga_jual' => 10000,
@@ -46,6 +50,7 @@ class ObatSeeder extends Seeder
                 'kadaluarsa' => Carbon::now()->addMonths(12),
             ],
             [
+                'kode_obat' => 'T001',
                 'jenis_obat' => 'bebas_terbatas',
                 'nama_obat' => 'CTM 4mg',
                 'harga_jual' => 1500,
@@ -56,11 +61,11 @@ class ObatSeeder extends Seeder
         ];
 
         $kodeAwalan = [
-            'Bebas' => 'B',
-            'Herbal' => 'H',
-            'Psikotropik' => 'P',
-            'Suplemen' => 'S',
-            'Bebas Terbatas' => 'T',
+            'bebas' => 'B',
+            'herbal' => 'H',
+            'psikotropik' => 'P',
+            'suplemen' => 'S',
+            'bebas_terbatas' => 'T',
         ];
 
         foreach ($data as $index => $obat) {

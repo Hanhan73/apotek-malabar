@@ -116,65 +116,6 @@
                 </div>
             </div>
             
-            @if($pembayaran->penerimaanPembelian->pembelian->jenis_pembayaran == 'kredit')
-            <div class="card mb-4">
-                <div class="card-header bg-warning text-dark">
-                    <h5 class="mb-0">Informasi Kredit</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <table class="table table-sm table-borderless">
-                                    <tr>
-                                        <td width="50%">Total Pembelian</td>
-                                        <td>: Rp {{ number_format($pembayaran->penerimaanPembelian->pembelian->total, 0, ',', '.') }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Total Dibayar</td>
-                                        <td>: Rp {{ number_format($pembayaran->penerimaanPembelian->pembayaran->sum('jumlah_bayar'), 0, ',', '.') }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Sisa Hutang</td>
-                                        <td class="font-weight-bold text-{{ $pembayaran->sisa_hutang > 0 ? 'danger' : 'success' }}">
-                                            : Rp {{ number_format($pembayaran->sisa_hutang, 0, ',', '.') }}
-                                        </td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <table class="table table-sm table-borderless">
-                                    <tr>
-                                        <td width="50%">Tanggal Pembelian</td>
-                                        <td>: {{ \Carbon\Carbon::parse($pembayaran->penerimaanPembelian->pembelian->tanggal_pembelian)->format('d/m/Y') }}</td>
-                                    </tr>
-                                    @if($pembayaran->penerimaanPembelian->pembelian->tanggal_jatuh_tempo)
-                                    <tr>
-                                        <td>Jatuh Tempo</td>
-                                        <td>: {{ \Carbon\Carbon::parse($pembayaran->penerimaanPembelian->pembelian->tanggal_jatuh_tempo)->format('d/m/Y') }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Status</td>
-                                        <td>
-                                            @if($pembayaran->sisa_hutang <= 0)
-                                                <span class="badge bg-success">Lunas</span>
-                                            @elseif($pembayaran->penerimaanPembelian->pembelian->tanggal_jatuh_tempo < now())
-                                                <span class="badge bg-danger">Telat {{ now()->diffInDays($pembayaran->penerimaanPembelian->pembelian->tanggal_jatuh_tempo) }} hari</span>
-                                            @else
-                                                <span class="badge bg-warning">Belum Lunas</span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                    @endif
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            @endif
             
             @if($pembayaran->penerimaanPembelian->pembayaran->count() > 1)
             <div class="card">
@@ -195,7 +136,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($pembayaran->penerimaanPembelian->pembayaran->sortBy('tanggal_bayar') as $index => $bayar)
+                                @foreach($pembayaran->penerimaanPembelian->pembayaran as $index => $bayar)
                                 <tr class="{{ $bayar->id == $pembayaran->id ? 'bg-light' : '' }}">
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ \Carbon\Carbon::parse($bayar->tanggal_bayar)->format('d/m/Y') }}</td>

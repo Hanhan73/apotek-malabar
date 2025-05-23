@@ -6,48 +6,47 @@ use App\Models\Obat;
 use App\Models\Pembelian;
 use App\Models\Penjualan;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
-    public function index()
-    {
-        // Total obat
-        $totalObat = Obat::count();
-        
-        // Obat hampir habis
-        $obatHampirHabis = Obat::where('stok', '>', 0)
+
+public function index()
+{
+    $user = Auth::user();
+    $role = $user->role; // Pastikan field `role` ada di tabel users
+
+    $data = [];
+
+    if (in_array($role, ['admin', 'pemilik'])) {
+        $data['pembelianBulanIni'] = Pembelian::whereMonth('tanggal_pembelian', Carbon::now()->month)
+            ->whereYear('tanggal_pembelian', Carbon::now()->year)
+            ->count();
+
+        $data['penjualanBulanIni'] = Penjualan::whereMonth('tanggal', Carbon::now()->month)
+            ->whereYear('tanggal', Carbon::now()->year)
+            ->count();
+    }
+
+    if (in_array($role, ['admin', 'apoteker'])) {
+        $data['totalObat'] = Obat::count();
+        $data['obatHampirHabis'] = Obat::where('stok', '>', 0)
             ->where('stok', '<=', 10)
             ->count();
-            
-        // Daftar obat hampir habis (5 teratas)
-        $obatHampirHabisList = Obat::where('stok', '>', 0)
+        $data['obatHampirHabisList'] = Obat::where('stok', '>', 0)
             ->where('stok', '<=', 10)
             ->orderBy('stok', 'asc')
             ->limit(5)
             ->get();
-            
-        // Pembelian bulan ini
-        $pembelianBulanIni = Pembelian::whereMonth('tanggal_pembelian', Carbon::now()->month)
-            ->whereYear('tanggal_pembelian', Carbon::now()->year)
-            ->count();
-            
-        // Penjualan bulan ini
-        $penjualanBulanIni = Penjualan::whereMonth('tanggal', Carbon::now()->month)
-            ->whereYear('tanggal', Carbon::now()->year)
-            ->count();
-            
-        // Transaksi terakhir
-        $transaksiTerakhir = Penjualan::latest('tanggal')
+    }
+
+    if (in_array($role, ['admin', 'apoteker', 'asisten_apoteker'])) {
+        $data['transaksiTerakhir'] = Penjualan::latest('tanggal')
             ->limit(5)
             ->get();
-
-        return view('dashboard', compact(
-            'totalObat',
-            'obatHampirHabis',
-            'obatHampirHabisList',
-            'pembelianBulanIni',
-            'penjualanBulanIni',
-            'transaksiTerakhir'
-        ));
     }
+
+    return view('dashboard', $data);
+}
+
 }
